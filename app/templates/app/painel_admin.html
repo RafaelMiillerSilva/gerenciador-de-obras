@@ -1,0 +1,1175 @@
+﻿{% extends "app/layout.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .painel-hero {
+        background: var(--azul-escuro);
+        padding: 40px 24px 48px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .painel-hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--verde), transparent);
+        }
+
+    .painel-hero-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .painel-titulo-bloco h1 {
+        font-family: var(--fonte-titulo);
+        font-size: 1.8rem !important;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+        .painel-titulo-bloco h1 span {
+            color: #6EC972;
+        }
+
+    .painel-titulo-bloco p {
+        color: #8AADD4;
+        font-size: 15px;
+    }
+
+    .nivel-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(46,125,50,0.15);
+        border: 1px solid rgba(46,125,50,0.35);
+        color: #6EC972;
+        font-family: var(--fonte-titulo);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 6px 14px;
+        border-radius: 4px;
+    }
+
+    /* Ajuste no painel-stats para funcionar como Abas Principais */
+    .painel-stats {
+        background: var(--azul);
+        border-bottom: 1px solid #1E3F6A;
+    }
+
+    .stats-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+    }
+
+    .stat-item {
+        flex: 1;
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-right: 1px solid #1E3F6A;
+        border-bottom: 4px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+        .stat-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .stat-item.macro-ativa {
+            background: rgba(255,255,255,0.08);
+            border-bottom-color: #6EC972;
+        }
+
+    .stat-bolinha {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+        .stat-bolinha.azul {
+            background: rgba(33,150,243,0.15);
+        }
+
+        .stat-bolinha.laranja {
+            background: rgba(255,152,0,0.15);
+        }
+
+        .stat-bolinha.verde-crea {
+            background: rgba(76,175,80,0.15);
+        }
+
+    .stat-texto .numero {
+        font-family: var(--fonte-titulo);
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1;
+    }
+
+    .stat-texto .rotulo {
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+        margin-top: 2px;
+    }
+
+    .stat-texto .sub-rotulo {
+        font-size: 11px;
+        color: #8AADD4;
+    }
+
+    .painel-body {
+        background: var(--cinza-claro);
+        padding: 36px 24px 64px;
+    }
+
+    .painel-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Containers de busca */
+    .busca-container {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        width: 100%;
+        max-width: 450px;
+        position: relative;
+    }
+
+    .busca-input {
+        width: 100%;
+        padding: 11px 16px 11px 40px;
+        border: 1.5px solid #D8E0EA;
+        border-radius: 6px;
+        font-size: 14px;
+        color: var(--texto);
+        outline: none;
+        transition: border-color 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+        .busca-input:focus {
+            border-color: var(--azul);
+        }
+
+    .busca-icone {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #A0AEC0;
+        font-size: 16px;
+    }
+
+    /* Controle de visibilidade das seções macro */
+    .macro-secao {
+        display: none;
+    }
+
+        .macro-secao.ativa {
+            display: block;
+        }
+
+    .django-msg {
+        padding: 12px 16px;
+        border-radius: 6px;
+        font-size: 15px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .django-msg.success {
+            background: #F0FAF0;
+            border: 1px solid #B2DFB2;
+            color: #2E7D32;
+        }
+
+        .django-msg.warning {
+            background: #FFF8E1;
+            border: 1px solid #FFE082;
+            color: #7B5800;
+        }
+
+        .django-msg.error {
+            background: #FFF3F0;
+            border: 1px solid #F5C0AE;
+            color: #C0392B;
+        }
+
+    .abas {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 24px;
+        border-bottom: 2px solid #E0E6F0;
+    }
+
+    .aba-btn {
+        padding: 10px 20px;
+        font-family: var(--fonte-titulo);
+        font-size: 14px;
+        font-weight: 700;
+        color: #888;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+        cursor: pointer;
+        transition: color 0.2s, border-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: 0.3px;
+    }
+
+        .aba-btn:hover {
+            color: var(--azul);
+        }
+
+        .aba-btn.ativa {
+            color: var(--azul);
+            border-bottom-color: var(--azul);
+        }
+
+    .aba-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 22px;
+        height: 22px;
+        padding: 0 6px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+        .aba-count.amarelo {
+            background: rgba(255,183,77,0.2);
+            color: #E65100;
+        }
+
+        .aba-count.verde {
+            background: rgba(76,175,80,0.15);
+            color: #2E7D32;
+        }
+
+        .aba-count.cinza {
+            background: #EEE;
+            color: #888;
+        }
+
+    .aba-painel {
+        display: none;
+    }
+
+        .aba-painel.ativa {
+            display: block;
+        }
+
+    .tabela-wrap {
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid var(--borda);
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(26,79,139,0.05);
+    }
+
+    .tabela-vazia {
+        padding: 48px 24px;
+        text-align: center;
+        color: #AAA;
+        font-size: 15px;
+    }
+
+        .tabela-vazia .icone {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead tr {
+        background: var(--azul-escuro);
+    }
+
+    thead th {
+        padding: 13px 16px;
+        font-family: var(--fonte-titulo);
+        font-size: 12px;
+        font-weight: 700;
+        color: #8AADD4;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid #F0F3F8;
+        transition: background 0.15s;
+    }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #F7F9FC;
+        }
+
+        tbody tr.hidden-row {
+            display: none !important;
+        }
+
+    tbody td {
+        padding: 14px 16px;
+        font-size: 15px;
+        color: var(--texto);
+        vertical-align: middle;
+    }
+
+    .td-nome strong {
+        display: block;
+        color: var(--azul-escuro);
+        font-weight: 600;
+    }
+
+    .td-nome span {
+        font-size: 13px;
+        color: #888;
+    }
+
+    .td-crea {
+        font-family: monospace;
+        font-size: 14px;
+        color: #5A7A9A;
+        background: #F0F4FA;
+        padding: 3px 8px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .td-data {
+        font-size: 14px;
+        color: #888;
+        white-space: nowrap;
+    }
+
+    .acoes {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-aprovar {
+        background: var(--verde);
+        color: #fff;
+        border: none;
+        padding: 7px 16px;
+        border-radius: 4px;
+        font-family: var(--fonte-titulo);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+        white-space: nowrap;
+    }
+
+        .btn-aprovar:hover {
+            background: var(--verde-claro);
+        }
+
+    .btn-negar {
+        background: transparent;
+        color: #C62828;
+        border: 1.5px solid #FFCDD2;
+        padding: 6px 14px;
+        border-radius: 4px;
+        font-family: var(--fonte-titulo);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+        white-space: nowrap;
+    }
+
+        .btn-negar:hover {
+            background: #FFEBEE;
+            border-color: #EF9A9A;
+        }
+
+    .btn-ver {
+        background: transparent;
+        color: var(--azul);
+        border: 1.5px solid #C5D5E8;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        white-space: nowrap;
+    }
+
+        .btn-ver:hover {
+            background: #EEF3FA;
+        }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(10,22,40,0.65);
+        z-index: 8888;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        backdrop-filter: blur(2px);
+    }
+
+        .modal-overlay.aberto {
+            display: flex;
+        }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 10px;
+        border-top: 4px solid var(--azul);
+        max-width: 580px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .modal-header {
+        padding: 24px 28px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+        .modal-header h2 {
+            font-family: var(--fonte-titulo);
+            font-size: 1.25rem !important;
+            font-weight: 800;
+            color: var(--azul-escuro);
+        }
+
+        .modal-header p {
+            color: #888;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+    .modal-fechar {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #AAA;
+        font-size: 20px;
+        padding: 4px 6px;
+        border-radius: 4px;
+        transition: color 0.15s, background 0.15s;
+        flex-shrink: 0;
+    }
+
+        .modal-fechar:hover {
+            color: #444;
+            background: #F0F0F0;
+        }
+
+    .modal-body {
+        padding: 20px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .modal-linha {
+        display: flex;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid #F0F3F8;
+        font-size: 15px;
+    }
+
+        .modal-linha:last-child {
+            border-bottom: none;
+        }
+
+        .modal-linha .ml {
+            color: #888;
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+
+        .modal-linha .mv {
+            color: var(--texto);
+            font-weight: 500;
+        }
+
+    .modal-negar-area {
+        padding: 0 28px 24px;
+    }
+
+        .modal-negar-area label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #4A5A6A;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .modal-negar-area textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #D8E0EA;
+            border-radius: 5px;
+            font-family: var(--fonte-corpo) !important;
+            font-size: 15px !important;
+            resize: vertical;
+            min-height: 90px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+            .modal-negar-area textarea:focus {
+                border-color: var(--azul);
+            }
+
+    .modal-footer {
+        padding: 16px 28px 24px;
+        border-top: 1px solid #F0F0EA;
+        background: #FAFAF8;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .btn-cancelar {
+        background: none;
+        border: 1.5px solid #DDD;
+        color: #888;
+        padding: 9px 20px;
+        border-radius: 5px;
+        font-family: var(--fonte-titulo);
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: border-color 0.2s, color 0.2s;
+    }
+
+        .btn-cancelar:hover {
+            border-color: #AAA;
+            color: #555;
+        }
+
+    @media (max-width: 768px) {
+        .stats-inner {
+            flex-direction: column;
+        }
+
+        .stat-item {
+            border-right: none;
+            border-bottom: 1px solid #1E3F6A;
+        }
+
+        table {
+            font-size: 13px;
+        }
+
+        thead th, tbody td {
+            padding: 10px 10px;
+        }
+    }
+</style>
+
+<section class="painel-hero">
+    <div class="painel-hero-inner">
+        <div class="painel-titulo-bloco">
+            <h1>Painel <span>Administrativo</span></h1>
+            <p>Gerencie o ecossistema de dados da Inspetoria de Adamantina</p>
+        </div>
+        <div class="nivel-badge">
+            &#128737;&#65039; N&iacute;vel {{ nivel }} &mdash;
+            {% if nivel == 1 %}Dev{% elif nivel == 2 %}Gestor{% endif %}
+        </div>
+    </div>
+</section>
+
+<div class="painel-stats">
+    <div class="stats-inner">
+        <a class="stat-item macro-ativa" id="macro-btn-solicitacoes" onclick="mudarMacro('solicitacoes'); return false;" href="#">
+            <div class="stat-bolinha azul">&#128196;</div>
+            <div class="stat-texto">
+                <div class="rotulo">Solicita&ccedil;&otilde;es</div>
+                <div class="sub-rotulo">Pendentes: {{ pendentes.count }}</div>
+            </div>
+        </a>
+        <a class="stat-item" id="macro-btn-usuarios" onclick="mudarMacro('usuarios'); return false;" href="#">
+            <div class="stat-bolinha laranja">&#128100;</div>
+            <div class="stat-texto">
+                <div class="rotulo">Usu&aacute;rios</div>
+                <div class="sub-rotulo">Gerenciar Profissionais</div>
+            </div>
+        </a>
+        <a class="stat-item" id="macro-btn-obras" onclick="mudarMacro('obras'); return false;" href="#">
+            <div class="stat-bolinha verde_crea">&#127959;&#65039;</div>
+            <div class="stat-texto">
+                <div class="rotulo">Obras</div>
+                <div class="sub-rotulo">Cadernetas Ativas</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<section class="painel-body">
+    <div class="painel-inner">
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="django-msg {{ msg.tags }}">
+            {% if msg.tags == 'success' %}&#9989;{% elif msg.tags == 'warning' %}&#9888;&#65039;{% else %}&#8505;&#65039;{% endif %}
+            {{ msg }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="macro-secao ativa" id="secao-solicitacoes">
+            <div class="busca-container">
+                <span class="busca-icone">&#128269;</span>
+                <input type="text" class="busca-input" id="busca-solicitacoes" onkeyup="filtrarTabela('secao-solicitacoes', this.value)" placeholder="Buscar solicitações por nome, CREA, e-mail...">
+            </div>
+
+            <div class="abas">
+                <button class="aba-btn ativa" id="tab-pendentes" onclick="mudarAba('pendentes')">
+                    &#9203; Pendentes <span class="aba-count amarelo">{{ pendentes.count }}</span>
+                </button>
+                <button class="aba-btn" id="tab-aprovadas" onclick="mudarAba('aprovadas')">
+                    &#9989; Aprovadas <span class="aba-count verde">{{ aprovadas.count }}</span>
+                </button>
+                <button class="aba-btn" id="tab-negadas" onclick="mudarAba('negadas')">
+                    &#10060; Negadas <span class="aba-count cinza">{{ negadas.count }}</span>
+                </button>
+            </div>
+
+            <div class="aba-painel ativa" id="painel-pendentes">
+                <div class="tabela-wrap">
+                    {% if pendentes %}
+                    <table>
+                        <thead><tr><th>Solicitante</th><th>CREA</th><th>Contato</th><th>Solicitado em</th><th>A&ccedil;&otilde;es</th></tr></thead>
+                        <tbody>
+                            {% for s in pendentes %}
+                            <tr>
+                                <td class="td-nome"><strong>{{ s.nome_completo }}</strong><span>{{ s.cidade }}{% if s.cidade and s.estado %}/{% endif %}{{ s.estado }}</span></td>
+                                <td>{% if s.numero_crea %}<span class="td-crea">{{ s.numero_crea }}</span>{% else %}<span style="color:#CCC">&mdash;</span>{% endif %}</td>
+                                <td class="td-data">{{ s.email }}<br><span style="color:#AAA">{{ s.celular }}</span></td>
+                                <td class="td-data">{{ s.criado_em|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <div class="acoes">
+                                        <button class="btn-ver" onclick="abrirDetalhes('{{ s.nome_completo|escapejs }}','{{ s.email|escapejs }}','{{ s.celular|escapejs }}','{{ s.numero_crea|escapejs }}','{{ s.data_nascimento|default:'' }}','{{ s.logradouro|escapejs }}, {{ s.numero|escapejs }} &mdash; {{ s.bairro|escapejs }}, {{ s.cidade|escapejs }}/{{ s.estado|escapejs }}','{{ s.criado_em|date:"d/m/Y H:i" }}')">&#128065; Ver dados</button>
+                                        <form method="post" action="{% url 'aprovar_solicitacao' s.pk %}" style="display:inline;" onsubmit="return confirm('Aprovar cadastro de {{ s.nome_completo|escapejs }}?')">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-aprovar">&#9989; Aprovar</button>
+                                        </form>
+                                        <button class="btn-negar" onclick="abrirNegar({{ s.pk }},'{{ s.nome_completo|escapejs }}')">&#10060; Negar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="tabela-vazia"><div class="icone">&#128235;</div>Nenhuma solicita&ccedil;&atilde;o pendente no momento.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="aba-painel" id="painel-aprovadas">
+                <div class="tabela-wrap">
+                    {% if aprovadas %}
+                    <table>
+                        <thead><tr><th>Solicitante</th><th>CREA</th><th>E-mail</th><th>Aprovado em</th><th>Aprovado por</th></tr></thead>
+                        <tbody>
+                            {% for s in aprovadas %}
+                            <tr>
+                                <td class="td-nome"><strong>{{ s.nome_completo }}</strong><span>{{ s.cidade }}{% if s.cidade and s.estado %}/{% endif %}{{ s.estado }}</span></td>
+                                <td>{% if s.numero_crea %}<span class="td-crea">{{ s.numero_crea }}</span>{% else %}<span style="color:#CCC">&mdash;</span>{% endif %}</td>
+                                <td class="td-data">{{ s.email }}</td>
+                                <td class="td-data">{{ s.atualizado_em|date:"d/m/Y H:i" }}</td>
+                                <td class="td-data">{% if s.analisado_por %}{{ s.analisado_por.first_name|default:s.analisado_por.username }}{% else %}&mdash;{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="tabela-vazia"><div class="icone">&#128203;</div>Nenhuma solicita&ccedil;&atilde;o aprovada ainda.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="aba-painel" id="painel-negadas">
+                <div class="tabela-wrap">
+                    {% if negadas %}
+                    <table>
+                        <thead><tr><th>Solicitante</th><th>E-mail</th><th>Negado em</th><th>Negado por</th><th>Motivo</th></tr></thead>
+                        <tbody>
+                            {% for s in negadas %}
+                            <tr>
+                                <td class="td-nome"><strong>{{ s.nome_completo }}</strong></td>
+                                <td class="td-data">{{ s.email }}</td>
+                                <td class="td-data">{{ s.atualizado_em|date:"d/m/Y H:i" }}</td>
+                                <td class="td-data">{% if s.analisado_por %}{{ s.analisado_por.first_name|default:s.analisado_por.username }}{% else %}&mdash;{% endif %}</td>
+                                <td style="font-size:14px;color:#888;max-width:200px;">{{ s.motivo_negacao|default:"Nao informado" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="tabela-vazia"><div class="icone">&#9989;</div>Nenhuma solicita&ccedil;&atilde;o negada.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="macro-secao" id="secao-usuarios">
+            <div class="busca-container">
+                <span class="busca-icone">&#128269;</span>
+                <input type="text" class="busca-input" id="busca-usuarios" onkeyup="filtrarTabela('secao-usuarios', this.value)" placeholder="Buscar usuários por nome, login, e-mail...">
+            </div>
+
+            <div class="tabela-wrap">
+                {% if usuarios %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome Completo</th>
+                            <th>Nº REGISTRO</th>
+                            <th>E-mail</th>
+                            <th>Data de Cadastro</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr class="linha-usuario"
+                            style="cursor: pointer; transition: background-color 0.2s;"
+                            onmouseover="this.style.backgroundColor='#f8f9fa';"
+                            onmouseout="this.style.backgroundColor='';"
+                            data-id="{{ u.id }}"
+                            data-nome-completo="{{ u.first_name }} {{ u.last_name }}"
+                            data-username="{{ u.username }}"
+                            data-email="{{ u.email }}"
+                            data-crea="{{ u.perfil.numero_crea|default:'' }}"
+                            data-celular="{{ u.perfil.celular|default:'' }}"
+                            data-nascimento="{{ u.perfil.data_nascimento|date:'Y-m-d' }}"
+                            data-cep="{{ u.perfil.cep|default:'' }}"
+                            data-logradouro="{{ u.perfil.logradouro|default:'' }}"
+                            data-numero="{{ u.perfil.numero|default:'' }}"
+                            data-complemento="{{ u.perfil.complemento|default:'' }}"
+                            data-bairro="{{ u.perfil.bairro|default:'' }}"
+                            data-cidade="{{ u.perfil.cidade|default:'' }}"
+                            data-estado="{{ u.perfil.estado|default:'' }}"
+                            data-nivel="{{ u.perfil.nivel|default:'3' }}"
+                            data-ativo="{{ u.is_active|yesno:'true,false' }}">
+
+                            <td class="td-nome">
+                                <strong>{{ u.first_name }} {{ u.last_name }}</strong>
+                                <span>{% if u.is_superuser %}Administrador{% else %}Profissional{% endif %}</span>
+                            </td>
+                            <td><span class="td-crea">{{ u.perfil.numero_crea|default:"&mdash;" }}</span></td>
+                            <td class="td-data">{{ u.email }}</td>
+                            <td class="td-data">{{ u.date_joined|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if u.is_active %}
+                                <span style="color:#2E7D32; font-weight:bold;">&#9989; Ativo</span>
+                                {% else %}
+                                <span style="color:#C62828; font-weight:bold;">&#10060; Inativo</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="tabela-vazia"><div class="icone">&#128100;</div>Nenhum usuário cadastrado no contexto enviado.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="macro-secao" id="secao-obras">
+            <div class="busca-container">
+                <span class="busca-icone">&#128269;</span>
+                <input type="text" class="busca-input" id="busca-obras" onkeyup="filtrarTabela('secao-obras', this.value)" placeholder="Buscar por Título, ART, Proprietário ou Engenheiro...">
+            </div>
+
+            <div class="tabela-wrap">
+                {% if obras %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Descri&ccedil;&atilde;o / Obra</th>
+                            <th>N&ordm; ART</th>
+                            <th>Propriet&aacute;rio</th>
+                            <th>Respons&aacute;vel T&eacute;cnico</th>
+                            <th>In&iacute;cio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in obras %}
+                        <tr>
+                            <td class="td-nome">
+                                <strong>{{ o.apelido }}</strong>
+                                <span>{{ o.recibo.local_obra|default:"Local não informado" }}</span>
+                            </td>
+                            <td><span class="td-crea">&mdash;</span></td>
+
+                            <td class="td-data">
+                                {{ o.recibo.proprietario.nome|default:"Sem proprietário" }}
+                            </td>
+
+                            <td class="td-data" style="color: var(--azul-escuro); font-weight: 500;">
+                                {{ o.usuario.first_name }} {{ o.usuario.last_name|default:o.usuario.username }}
+                            </td>
+
+                            <td class="td-data">
+                                {% if o.recibo %}
+                                {{ o.recibo.data|date:"d/m/Y" }}
+                                {% else %}
+                                --
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="tabela-vazia"><div class="icone">&#127959;&#65039;</div>Nenhuma obra registrada no sistema até o momento.</div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<div class="modal-overlay" id="modalDetalhes">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div><h2 id="md-nome">&mdash;</h2><p>Detalhes da solicita&ccedil;&atilde;o</p></div>
+            <button class="modal-fechar" onclick="fecharModal('modalDetalhes')">&#10005;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-linha"><span class="ml">E-mail</span><span class="mv" id="md-email">&mdash;</span></div>
+            <div class="modal-linha"><span class="ml">Celular</span><span class="mv" id="md-cel">&mdash;</span></div>
+            <div class="modal-linha"><span class="ml">CREA</span><span class="mv" id="md-crea">&mdash;</span></div>
+            <div class="modal-linha"><span class="ml">Nascimento</span><span class="mv" id="md-nasc">&mdash;</span></div>
+            <div class="modal-linha"><span class="ml">Endere&ccedil;o</span><span class="mv" id="md-end">&mdash;</span></div>
+            <div class="modal-linha"><span class="ml">Solicitado em</span><span class="mv" id="md-data">&mdash;</span></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancelar" onclick="fecharModal('modalDetalhes')">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalNegar">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div><h2>Negar solicita&ccedil;&atilde;o</h2><p id="mn-nome">&mdash;</p></div>
+            <button class="modal-fechar" onclick="fecharModal('modalNegar')">&#10005;</button>
+        </div>
+        <form method="post" id="formNegar" action="">
+            {% csrf_token %}
+            <div class="modal-negar-area" style="padding-top:20px;">
+                <label>Motivo da nega&ccedil;&atilde;o (opcional)</label>
+                <textarea name="motivo" id="mn-motivo" placeholder="Descreva o motivo..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" onclick="fecharModal('modalNegar')">Cancelar</button>
+                <button type="submit" class="btn-aprovar" style="background:#C62828;">&#10060; Confirmar nega&ccedil;&atilde;o</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalUsuario">
+    <div class="modal-box" style="max-width: 750px;">
+        <div class="modal-header">
+            <div>
+                <h2>Detalhes do Usuário</h2>
+                <p>Visualize ou gerencie todas as informações e permissões do profissional</p>
+            </div>
+            <button type="button" class="modal-fechar" onclick="fecharModal('modalUsuario')">&#10005;</button>
+        </div>
+
+        <form id="formEdicaoUsuario" method="POST" action="">
+            {% csrf_token %}
+            <div class="modal-body">
+
+                <h3 style="font-size: 13px; color: var(--azul); border-bottom: 1px solid #E0E6F0; padding-bottom: 6px; margin: 10px 0 14px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Informações Pessoais e de Acesso</h3>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+                    <div style="grid-column: span 2;">
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Nome Completo</label>
+                        <input type="text" class="busca-input lockable" id="modal_nome_completo" name="nome_completo" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Usuário (Login)</label>
+                        <input type="text" class="busca-input lockable" id="modal_username" name="username" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">E-mail</label>
+                        <input type="email" class="busca-input lockable" id="modal_email" name="email" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Celular</label>
+                        <input type="text" class="busca-input lockable" id="modal_celular" name="celular" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Nº do CREA</label>
+                        <input type="text" class="busca-input lockable" id="modal_crea" name="numero_crea" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Data de Nascimento</label>
+                        <input type="date" class="busca-input lockable" id="modal_nascimento" name="data_nascimento" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Nível de Acesso</label>
+                        <select class="busca-input lockable-select" id="modal_nivel" name="nivel" disabled style="padding: 10px 14px; height: 41px; background: white;">
+                            <option value="1">Nível 1 - Dev</option>
+                            <option value="2">Nível 2 - Gestor</option>
+                            <option value="3">Nível 3 - Engenheiro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Status da Conta</label>
+                        <select class="busca-input lockable-select" id="modal_ativo" name="is_active" disabled style="padding: 10px 14px; height: 41px; background: white;">
+                            <option value="true">Ativo</option>
+                            <option value="false">Inativo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 13px; color: var(--azul); border-bottom: 1px solid #E0E6F0; padding-bottom: 6px; margin: 24px 0 14px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Endereço Residencial / Comercial</h3>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px;">
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">CEP</label>
+                        <input type="text" class="busca-input lockable" id="modal_cep" name="cep" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Logradouro</label>
+                        <input type="text" class="busca-input lockable" id="modal_logradouro" name="logradouro" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Número</label>
+                        <input type="text" class="busca-input lockable" id="modal_numero" name="numero" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Complemento</label>
+                        <input type="text" class="busca-input lockable" id="modal_complemento" name="complemento" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Bairro</label>
+                        <input type="text" class="busca-input lockable" id="modal_bairro" name="bairro" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Cidade</label>
+                        <input type="text" class="busca-input lockable" id="modal_cidade" name="cidade" readonly style="padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color:#4A5A6A; text-transform:uppercase; margin-bottom:4px;">Estado</label>
+                        <input type="text" class="busca-input lockable" id="modal_estado" name="estado" readonly style="padding: 10px 14px;" maxlength="2">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer" style="margin-top: 10px;">
+                <button type="button" class="btn-ver" id="btnDestravar" style="padding: 9px 20px;">Editar Dados</button>
+                <button type="submit" class="btn-aprovar" id="btnSalvar" style="display: none; padding: 9px 20px;">Salvar Alterações</button>
+                <button type="button" class="btn-cancelar" onclick="fecharModal('modalUsuario')">Fechar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------
+    // CONTROLE DE SEÇÕES MACRO E SUB-ABAS
+    // --------------------------------------------------------
+    function mudarMacro(nomeMacro) {
+        document.querySelectorAll('.macro-secao').forEach(sec => sec.classList.remove('ativa'));
+        document.querySelectorAll('.stat-item').forEach(btn => btn.classList.remove('macro-ativa'));
+
+        document.getElementById('secao-' + nomeMacro).classList.add('ativa');
+        document.getElementById('macro-btn-' + nomeMacro).classList.add('macro-ativa');
+    }
+
+    function mudarAba(nome) {
+        document.querySelectorAll('.aba-painel').forEach(p => p.classList.remove('ativa'));
+        document.querySelectorAll('.aba-btn').forEach(b => b.classList.remove('ativa'));
+        document.getElementById('painel-' + nome).classList.add('ativa');
+        document.getElementById('tab-' + nome).classList.add('ativa');
+    }
+
+    // --------------------------------------------------------
+    // FILTRO DE BUSCA GLOBAL EM TEMPO REAL
+    // --------------------------------------------------------
+    function filtrarTabela(idSecao, termo) {
+        let filtro = termo.toLowerCase().trim();
+        let secao = document.getElementById(idSecao);
+        let linhas = secao.querySelectorAll('tbody tr');
+
+        linhas.forEach(linha => {
+            if (linha.classList.contains('tabela-vazia')) return;
+
+            let textoLinha = Server = linha.textContent.toLowerCase();
+            if (textoLinha.indexOf(filtro) > -1) {
+                linha.classList.remove('hidden-row');
+            } else {
+                linha.classList.add('hidden-row');
+            }
+        });
+    }
+
+    // --------------------------------------------------------
+    // CONTROLE GERAL DOS MODAIS (ABRIR E FECHAR NATIVO)
+    // --------------------------------------------------------
+    function abrirDetalhes(nome, email, cel, crea, nasc, end, data) {
+        document.getElementById('md-nome').textContent = nome;
+        document.getElementById('md-email').textContent = email || '--';
+        document.getElementById('md-cel').textContent = cel || '--';
+        document.getElementById('md-crea').textContent = crea || '--';
+        document.getElementById('md-nasc').textContent = nasc || '--';
+        document.getElementById('md-end').textContent = end || '--';
+        document.getElementById('md-data').textContent = data || '--';
+        document.getElementById('modalDetalhes').classList.add('aberto');
+    }
+
+    function abrirNegar(pk, nome) {
+        document.getElementById('mn-nome').textContent = nome;
+        document.getElementById('mn-motivo').value = '';
+        document.getElementById('formNegar').action = '/painel/negar/' + pk + '/';
+        document.getElementById('modalNegar').classList.add('aberto');
+    }
+
+    function fecharModal(id) {
+        document.getElementById(id).classList.remove('aberto');
+    }
+
+    // Atalhos globais para fechar modais (ESC e Clique Fora)
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            fecharModal('modalDetalhes');
+            fecharModal('modalNegar');
+            fecharModal('modalUsuario');
+        }
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+        o.addEventListener('click', e => {
+            if (e.target === o) fecharModal(o.id);
+        });
+    });
+
+    // --------------------------------------------------------
+    // MAPEAMENTO E CONTROLE EXCLUSIVO DO MODAL DE USUÁRIOS
+    // --------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', function () {
+        const linhasUsuarios = document.querySelectorAll('.linha-usuario');
+        const btnDestravar = document.getElementById('btnDestravar');
+        const btnSalvar = document.getElementById('btnSalvar');
+        const inputsLockable = document.querySelectorAll('.lockable');
+        const selectsLockable = document.querySelectorAll('.lockable-select');
+        const formEdicao = document.getElementById('formEdicaoUsuario');
+
+        linhasUsuarios.forEach(linha => {
+            linha.addEventListener('click', function (e) {
+                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+
+                // 1. Alimenta todos os campos do Modal utilizando os dados do Dataset
+                document.getElementById('modal_nome_completo').value = this.dataset.nomeCompleto || '';
+                document.getElementById('modal_username').value = this.dataset.username || '';
+                document.getElementById('modal_email').value = this.dataset.email || '';
+                document.getElementById('modal_crea').value = this.dataset.crea || '';
+                document.getElementById('modal_celular').value = this.dataset.celular || '';
+                document.getElementById('modal_nascimento').value = this.dataset.nascimento || '';
+
+                // Dados de Endereço extraídos do PerfilUsuario
+                document.getElementById('modal_cep').value = this.dataset.cep || '';
+                document.getElementById('modal_logradouro').value = this.dataset.logradouro || '';
+                document.getElementById('modal_numero').value = this.dataset.numero || '';
+                document.getElementById('modal_complemento').value = this.dataset.complemento || '';
+                document.getElementById('modal_bairro').value = this.dataset.bairro || '';
+                document.getElementById('modal_cidade').value = this.dataset.cidade || '';
+                document.getElementById('modal_estado').value = this.dataset.estado || '';
+
+                // Nível e Status
+                document.getElementById('modal_nivel').value = this.dataset.nivel || '3';
+                document.getElementById('modal_ativo').value = this.dataset.ativo || 'true';
+
+                // 2. Define dinamicamente o destino de envio (action) com o ID correto do Usuário
+                formEdicao.action = `/painel/usuario/${this.dataset.id}/editar/`;
+
+                // 3. Reseta os campos para o modo travado (Leitura apenas)
+                inputsLockable.forEach(input => input.setAttribute('readonly', true));
+                selectsLockable.forEach(select => select.setAttribute('disabled', true));
+
+                // 4. Alterna a visibilidade dos botões de ação
+                if (btnDestravar) btnDestravar.style.display = 'inline-block';
+                if (btnSalvar) btnSalvar.style.display = 'none';
+
+                // 5. Exibe o modal na tela adicionando a classe nativa
+                document.getElementById('modalUsuario').classList.add('aberto');
+            });
+        });
+
+        // Evento de clique no botão "Editar Dados" (Destrava os inputs do formulário)
+        if (btnDestravar) {
+            btnDestravar.addEventListener('click', function () {
+                inputsLockable.forEach(input => input.removeAttribute('readonly'));
+                selectsLockable.forEach(select => select.removeAttribute('disabled'));
+
+                btnDestravar.style.display = 'none';
+                if (btnSalvar) btnSalvar.style.display = 'inline-block';
+            });
+        }
+    });
+</script>
+{% endblock %}

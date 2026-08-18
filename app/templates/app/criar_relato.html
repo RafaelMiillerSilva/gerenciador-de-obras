@@ -1,0 +1,290 @@
+{% extends "app/layout.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .form-hero {
+        background: var(--azul-escuro);
+        padding: 32px 24px 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .form-hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,transparent,var(--verde),transparent);
+        }
+
+    .form-titulo h1 {
+        font-family: var(--fonte-titulo);
+        font-size: 1.7rem !important;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+    .form-titulo p {
+        color: #8AADD4;
+        font-size: 14px;
+    }
+
+    .voltar {
+        color: #8AADD4;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 12px;
+        transition: color .2s;
+    }
+
+        .voltar:hover {
+            color: #fff;
+            text-decoration: none;
+        }
+
+    .form-body {
+        background: var(--cinza-claro);
+        padding: 36px 24px 64px;
+    }
+
+    .form-inner {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: #fff;
+        border: 1px solid var(--borda);
+        border-radius: 10px;
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: var(--azul-escuro);
+        padding: 16px 24px;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .form-content {
+        padding: 24px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #4A5A6A;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 8px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 10px 14px;
+            border: 1.5px solid #D8E0EA;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+            .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+                border-color: var(--azul);
+                background: #F7F9FC;
+            }
+
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .form-check input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-check label {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            cursor: pointer;
+        }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding-top: 24px;
+        border-top: 1px solid var(--borda);
+    }
+
+    .btn-voltar {
+        background: none;
+        border: 1.5px solid #DDD;
+        color: #888;
+        padding: 10px 22px;
+        border-radius: 5px;
+        font-family: var(--fonte-titulo);
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+        .btn-voltar:hover {
+            border-color: #AAA;
+            color: #555;
+        }
+
+    .btn-salvar {
+        background: var(--verde);
+        color: #fff;
+        border: none;
+        padding: 10px 28px;
+        border-radius: 5px;
+        font-family: var(--fonte-titulo);
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+        .btn-salvar:hover {
+            background: var(--verde-claro);
+        }
+</style>
+
+<section class="form-hero">
+    <div style="max-width:900px; margin:0 auto;">
+        <a href="{% url 'detalhe_caderneta' caderneta.pk %}" class="voltar">- Voltar</a>
+        <div class="form-titulo">
+            <h1>Novo Relato de Visita</h1>
+            <p>Registro de visita tecnica para {{ caderneta.apelido }}</p>
+        </div>
+    </div>
+</section>
+
+<section class="form-body">
+    <div class="form-inner">
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <!-- SECAO 1: DATA E CONFORMIDADE -->
+            <div class="form-section">
+                <div class="form-header">Informacoes da Visita</div>
+                <div class="form-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.data.id_for_label }}">{{ form.data.label }} <span style="color:#C0392B">*</span></label>
+                            {{ form.data }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.conformidade.id_for_label }}">{{ form.conformidade.label }} <span style="color:#C0392B">*</span></label>
+                            {{ form.conformidade }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECAO 2: SERVICOS -->
+            <div class="form-section">
+                <div class="form-header">Servicos Executados</div>
+                <div class="form-content">
+                    <label style="font-size:13px; font-weight:700; color:#4A5A6A; text-transform:uppercase; letter-spacing:.5px;">{{ form.opcoes_servicos.label }} <span style="color:#C0392B">*</span></label>
+                    <div class="checkbox-group">
+                        {% for value, label in form.opcoes_servicos.field.choices %}
+                        <div class="form-check">
+                            <input type="checkbox" name="opcoes_servicos" value="{{ value }}" id="id_opcoes_servicos_{{ forloop.counter }}" class="form-check-input">
+                            <label for="id_opcoes_servicos_{{ forloop.counter }}" class="form-check-label">{{ label }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.opcoes_servicos.errors %}
+                    <div style="color:#C0392B; font-size:12px; margin-top:8px;">{{ form.opcoes_servicos.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- SECAO 3: OBSERVACOES -->
+            <div class="form-section">
+                <div class="form-header">Observacoes e Decisoes Tecnicas</div>
+                <div class="form-content">
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
+                            {{ form.observacoes }}
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="{{ form.decisoes_tecnicas.id_for_label }}">{{ form.decisoes_tecnicas.label }}</label>
+                            {{ form.decisoes_tecnicas }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECAO STATUS -->
+            <div class="form-section">
+                <div class="form-header">Status do Formulario</div>
+                <div class="form-content">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <select name="status" id="id_status" class="form-control" style="max-width:300px;">
+                            <option value="em_andamento" {% if form.status.value == 'em_andamento' %}selected{% endif %}>Em andamento</option>
+                            <option value="pronto_assinar" {% if form.status.value == 'pronto_assinar' %}selected{% endif %}>Pronto para assinar</option>
+                        </select>
+                    </div>
+                    <p style="font-size:12px; color:#AAA; margin-top:8px;">
+                        {% if is_edit %}<strong>Aviso:</strong> Se editar este formulario, o status sera automaticamente resetado para "Em andamento".{% else %}Selecione o status do relato.{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- ACOES -->
+            <div class="form-section">
+                <div class="form-content">
+                    <div class="form-actions">
+                        <a href="{% url 'detalhe_caderneta' caderneta.pk %}" class="btn-voltar">Cancelar</a>
+                        <button type="submit" class="btn-salvar">+ {% if is_edit %}Atualizar{% else %}Salvar{% endif %} Relato</button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends "app/layout.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .sol-hero { background: var(--azul-escuro); padding: 60px 24px 68px; text-align: center; position: relative; overflow: hidden; }
+    .sol-hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent, var(--verde), transparent); }
+    .sol-hero-inner { position: relative; max-width: 620px; margin: 0 auto; }
+    .page-tag { display: inline-block; background: rgba(46,125,50,0.15); border: 1px solid rgba(46,125,50,0.35); color: #6EC972; font-family: var(--fonte-titulo); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 5px 14px; border-radius: 3px; margin-bottom: 16px; }
+    .sol-hero h1 { font-family: var(--fonte-titulo); font-size: clamp(30px,4vw,46px) !important; font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 14px; }
+    .sol-hero h1 em { font-style: normal; color: #6EC972; }
+    .sol-hero p { color: #8AADD4; font-size: 17px; line-height: 1.65; max-width: 500px; margin: 0 auto; }
+    .sol-page { background: var(--cinza-claro); padding: 48px 24px 72px; }
+    .sol-wrap { max-width: 820px; margin: 0 auto; }
+    .aviso-restrito { background: rgba(26,79,139,0.07); border: 1px solid rgba(26,79,139,0.2); border-left: 4px solid var(--azul); border-radius: 0 6px 6px 0; padding: 14px 18px; margin-bottom: 28px; display: flex; align-items: flex-start; gap: 12px; font-size: 15px; color: #3A5A80; line-height: 1.55; }
+    .msg-erro { background: #FFF3F0; border: 1px solid #F5C0AE; border-radius: 6px; padding: 12px 16px; color: #C0392B; font-size: 15px; margin-bottom: 12px; display: flex; gap: 8px; }
+    .sol-card { background: #fff; border-radius: 10px 10px 0 0; border: 1px solid var(--borda); border-top: 4px solid var(--azul); overflow: hidden; box-shadow: 0 4px 20px rgba(26,79,139,0.07); }
+    .card-secao { padding: 28px 34px; border-bottom: 1px solid #F0F0EA; }
+    .secao-titulo { font-family: var(--fonte-titulo); font-size: 14px; font-weight: 700; color: var(--azul-escuro); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .secao-titulo::after { content: ''; flex: 1; height: 1px; background: #E8EDF4; }
+    .campo-grid { display: grid; gap: 16px; }
+    .campo-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .campo-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .campo-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .campo-grupo { display: flex; flex-direction: column; gap: 5px; }
+    .campo-grupo label { font-size: 13px; font-weight: 700; color: #4A5A6A; text-transform: uppercase; letter-spacing: 0.5px; }
+    .campo-grupo label .req { color: #C0392B; margin-left: 2px; }
+    .campo-grupo input, .campo-grupo select { width: 100%; padding: 10px 14px; border: 1.5px solid #D8E0EA; border-radius: 5px; font-family: var(--fonte-corpo) !important; font-size: 16px !important; color: var(--texto); background: #FAFBFD; outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
+    .campo-grupo input::placeholder { color: #B8C4D0; }
+    .campo-grupo input:focus, .campo-grupo select:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(26,79,139,0.10); background: #fff; }
+    .erros-campo { font-size: 13px; color: #C0392B; margin-top: 2px; }
+    .campo-hint { font-size: 13px; color: #8AADD4; margin-top: 2px; }
+    .dica-cep { background: rgba(26,79,139,0.05); border: 1px solid rgba(26,79,139,0.15); border-radius: 5px; padding: 9px 13px; font-size: 14px; color: #5A7A9A; margin-bottom: 14px; display: flex; gap: 8px; align-items: center; }
+    .termos-grupo { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+    .termos-grupo input[type="checkbox"] { width: 18px; height: 18px; min-width: 18px; margin-top: 3px; accent-color: var(--azul); cursor: pointer; }
+    .termos-grupo span { font-size: 15px; color: #555; line-height: 1.5; }
+    .termos-grupo a { color: var(--azul); text-decoration: none; font-weight: 500; }
+    .card-rodape { background: #F7F9FC; border: 1px solid var(--borda); border-top: 1px solid #EEF1F7; border-radius: 0 0 10px 10px; padding: 22px 34px 28px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .rodape-nota { color: #AAA; font-size: 14px; }
+    .rodape-nota span { color: #C0392B; }
+    .link-login { font-size: 15px; color: #888; margin-top: 6px; }
+    .link-login a { color: var(--azul); text-decoration: none; font-weight: 600; }
+    .btn-solicitar { background: var(--verde); color: #fff; border: none; padding: 13px 32px; border-radius: 5px; font-family: var(--fonte-titulo); font-size: 1.02rem; font-weight: 700; letter-spacing: 0.4px; cursor: pointer; transition: background 0.2s, transform 0.1s; display: flex; align-items: center; gap: 8px; }
+    .btn-solicitar:hover { background: var(--verde-claro); transform: translateY(-1px); }
+    @media (max-width: 640px) { .card-secao { padding: 20px 18px; } .card-rodape { padding: 18px; flex-direction: column; align-items: stretch; } .btn-solicitar { justify-content: center; } .campo-grid.cols-2, .campo-grid.cols-3 { grid-template-columns: 1fr; } .campo-grid.cols-4 { grid-template-columns: 1fr 1fr; } }
+</style>
+
+<section class="sol-hero">
+    <div class="sol-hero-inner">
+        <div class="page-tag">&#128203; Novo acesso</div>
+        <h1>Solicitar<br><em>cadastro no sistema</em></h1>
+        <p>Preencha seus dados. Ap&oacute;s an&aacute;lise pela equipe administrativa, voc&ecirc; receber&aacute; um e-mail com suas credenciais de acesso.</p>
+    </div>
+</section>
+
+<section class="sol-page">
+    <div class="sol-wrap">
+        <div class="aviso-restrito">
+            <span style="font-size:20px;flex-shrink:0;">&#128274;</span>
+            <span>Este sistema &eacute; de <strong>uso interno do CREA de Adamantina</strong>. O cadastro ser&aacute; analisado por um administrador antes de ser liberado.</span>
+        </div>
+
+        {% if form.non_field_errors %}
+            {% for erro in form.non_field_errors %}
+                <div class="msg-erro">&#9888;&#65039; {{ erro }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" autocomplete="on" novalidate>
+            {% csrf_token %}
+            <div class="sol-card">
+
+                <div class="card-secao">
+                    <div class="secao-titulo">&#128100; Dados Pessoais</div>
+                    <div class="campo-grid" style="gap:16px;">
+                        <div class="campo-grupo">
+                            <label>Nome completo <span class="req">*</span></label>
+                            {{ form.nome_completo }}
+                            {% if form.nome_completo.errors %}<span class="erros-campo">{{ form.nome_completo.errors|join:", " }}</span>{% endif %}
+                        </div>
+                        <div class="campo-grid cols-2">
+                            <div class="campo-grupo">
+                                <label>Data de nascimento</label>
+                                {{ form.data_nascimento }}
+                            </div>
+                            <div class="campo-grupo">
+                                <label>N&uacute;mero do CREA</label>
+                                {{ form.numero_crea }}
+                                <span class="campo-hint">Ex: 5062345678/SP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-secao">
+                    <div class="secao-titulo">&#128222; Contato</div>
+                    <div class="campo-grid cols-2">
+                        <div class="campo-grupo">
+                            <label>E-mail <span class="req">*</span></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<span class="erros-campo">{{ form.email.errors|join:", " }}</span>{% endif %}
+                        </div>
+                        <div class="campo-grupo">
+                            <label>Celular</label>
+                            {{ form.celular }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-secao">
+                    <div class="secao-titulo">&#128205; Endere&ccedil;o</div>
+                    <div class="dica-cep">&#128161; Digite seu CEP para preencher o endere&ccedil;o automaticamente.</div>
+                    <div class="campo-grid" style="gap:16px;">
+                        <div class="campo-grid cols-4">
+                            <div class="campo-grupo"><label>CEP</label>{{ form.cep }}</div>
+                            <div class="campo-grupo" style="grid-column:span 3;"><label>Logradouro</label>{{ form.logradouro }}</div>
+                        </div>
+                        <div class="campo-grid cols-3">
+                            <div class="campo-grupo"><label>N&uacute;mero</label>{{ form.numero }}</div>
+                            <div class="campo-grupo" style="grid-column:span 2;"><label>Complemento</label>{{ form.complemento }}</div>
+                        </div>
+                        <div class="campo-grid cols-3">
+                            <div class="campo-grupo"><label>Bairro</label>{{ form.bairro }}</div>
+                            <div class="campo-grupo"><label>Cidade</label>{{ form.cidade }}</div>
+                            <div class="campo-grupo"><label>Estado</label>{{ form.estado }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-secao">
+                    <div class="secao-titulo">&#128196; Termos</div>
+                    <label class="termos-grupo">
+                        {{ form.termos }}
+                        <span>Li e concordo com os <a href="#">Termos de Uso</a> e a <a href="#">Pol&iacute;tica de Privacidade</a> do sistema. Confirmo que sou servidor autorizado do CREA de Adamantina.</span>
+                    </label>
+                    {% if form.termos.errors %}<div class="erros-campo" style="margin-top:8px;">&#9888;&#65039; {{ form.termos.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="card-rodape">
+                <div>
+                    <div class="rodape-nota"><span>*</span> Campos obrigat&oacute;rios</div>
+                    <div class="link-login">J&aacute; tem acesso? <a href="{% url 'login' %}">Fa&ccedil;a login aqui</a></div>
+                </div>
+                <button type="submit" class="btn-solicitar">&#128203; Enviar Solicita&ccedil;&atilde;o de Cadastro</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    const campoTel = document.querySelector('input[name="celular"]');
+    if (campoTel) {
+        campoTel.addEventListener('input', function() {
+            let v = this.value.replace(/\D/g,'').substring(0,11);
+            if (v.length>6) v='('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);
+            else if (v.length>2) v='('+v.slice(0,2)+') '+v.slice(2);
+            else if (v.length>0) v='('+v;
+            this.value=v;
+        });
+    }
+    const campoCep = document.querySelector('input[name="cep"]');
+    if (campoCep) {
+        campoCep.addEventListener('input', function() {
+            let v = this.value.replace(/\D/g,'').substring(0,8);
+            if (v.length>5) v=v.slice(0,5)+'-'+v.slice(5);
+            this.value=v;
+        });
+        campoCep.addEventListener('blur', async function() {
+            const nums = this.value.replace(/\D/g,'');
+            if (nums.length!==8) return;
+            try {
+                const r = await fetch('https://viacep.com.br/ws/'+nums+'/json/');
+                const d = await r.json();
+                if (!d.erro) {
+                    const set=(name,val)=>{const el=document.querySelector('input[name="'+name+'"]');if(el&&val)el.value=val;};
+                    set('logradouro',d.logradouro); set('bairro',d.bairro); set('cidade',d.localidade);
+                    const sel=document.querySelector('select[name="estado"]');
+                    if(sel&&d.uf){for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===d.uf){sel.selectedIndex=i;break;}}}
+                    document.querySelector('input[name="numero"]')?.focus();
+                }
+            } catch(e) {}
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "app/layout.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .enviada-page { min-height: calc(100vh - 66px - 56px); background: var(--cinza-claro); display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+    .enviada-card { background: #fff; border-radius: 12px; border: 1px solid var(--borda); border-top: 5px solid var(--verde); max-width: 520px; width: 100%; padding: 52px 44px; text-align: center; box-shadow: 0 8px 32px rgba(26,79,139,0.09); }
+    .enviada-icone { width: 72px; height: 72px; background: rgba(46,125,50,0.1); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 22px; border: 2px solid rgba(46,125,50,0.2); }
+    .enviada-card h1 { font-family: var(--fonte-titulo); font-size: 1.8rem !important; font-weight: 800; color: var(--azul-escuro); margin-bottom: 14px; line-height: 1.15; }
+    .enviada-card h1 span { color: var(--verde); }
+    .enviada-card p { color: #666; font-size: 16px; line-height: 1.65; margin-bottom: 12px; }
+    .enviada-detalhe { background: var(--cinza-claro); border-radius: 8px; padding: 16px 20px; margin: 24px 0; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+    .detalhe-linha { display: flex; align-items: flex-start; gap: 10px; font-size: 15px; color: #555; line-height: 1.45; }
+    .detalhe-linha .di { font-size: 18px; flex-shrink: 0; }
+    .enviada-acoes { margin-top: 28px; display: flex; flex-direction: column; gap: 10px; }
+    .btn-voltar-home { display: block; background: var(--azul); color: #fff; padding: 12px 20px; border-radius: 5px; font-family: var(--fonte-titulo); font-size: 1rem; font-weight: 700; text-decoration: none; transition: background 0.2s, transform 0.1s; }
+    .btn-voltar-home:hover { background: var(--azul-claro); color: #fff; text-decoration: none; transform: translateY(-1px); }
+    .link-voltar { font-size: 14px; color: #AAA; text-decoration: none; }
+    .link-voltar:hover { color: var(--azul); text-decoration: underline; }
+</style>
+<div class="enviada-page">
+    <div class="enviada-card">
+        <div class="enviada-icone">&#9989;</div>
+        <h1>Solicita&ccedil;&atilde;o<br><span>enviada com sucesso!</span></h1>
+        <p>Seus dados foram recebidos e est&atilde;o aguardando an&aacute;lise pela equipe administrativa do CREA de Adamantina.</p>
+        <div class="enviada-detalhe">
+            <div class="detalhe-linha"><span class="di">&#128231;</span><span>Voc&ecirc; receber&aacute; um <strong>e-mail</strong> assim que sua solicita&ccedil;&atilde;o for analisada.</span></div>
+            <div class="detalhe-linha"><span class="di">&#128272;</span><span>Se aprovado, seu <strong>usu&aacute;rio e senha tempor&aacute;ria</strong> ser&atilde;o enviados para seu e-mail.</span></div>
+            <div class="detalhe-linha"><span class="di">&#9201;&#65039;</span><span>O prazo de an&aacute;lise &eacute; de at&eacute; <strong>2 dias &uacute;teis</strong>.</span></div>
+        </div>
+        <p style="font-size:14px;color:#AAA;">D&uacute;vidas? Entre em contato com a administra&ccedil;&atilde;o do CREA diretamente.</p>
+        <div class="enviada-acoes">
+            <a href="{% url 'home' %}" class="btn-voltar-home">&larr; Voltar &agrave; p&aacute;gina inicial</a>
+            <a href="{% url 'login' %}" class="link-voltar">J&aacute; tenho acesso &mdash; Fazer login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

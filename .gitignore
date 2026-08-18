@@ -1,0 +1,21 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Ambientes Virtuais (Virtual environments)
+venv/
+env/
+.env/
+.venv/
+
+# Django
+*.log
+local_settings.py
+
+# Arquivos de Sistema Operacional
+.DS_Store
+Thumbs.db
+# Visual Studio
+.vs/

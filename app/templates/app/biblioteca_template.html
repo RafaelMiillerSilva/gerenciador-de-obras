@@ -1,0 +1,219 @@
+{% extends "app/layout.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .bib-hero { background: var(--azul-escuro); padding: 36px 24px 44px; position: relative; overflow: hidden; }
+    .bib-hero::after { content:''; position:absolute; bottom:0; left:0; right:0; height:4px; background:linear-gradient(90deg,transparent,var(--verde),transparent); }
+    .bib-hero-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .bib-hero h1 { font-family:var(--fonte-titulo); font-size:1.8rem!important; font-weight:800; color:#fff; margin-bottom:4px; }
+    .bib-hero h1 span { color:#6EC972; }
+    .bib-hero p { color:#8AADD4; font-size:15px; }
+    .btn-nova { background:var(--verde); color:#fff; border:none; padding:10px 22px; border-radius:5px; font-family:var(--fonte-titulo); font-size:0.95rem; font-weight:700; text-decoration:none; white-space:nowrap; transition:background .2s; }
+    .btn-nova:hover { background:var(--verde-claro); color:#fff; text-decoration:none; }
+
+    .bib-filtros { background:#fff; border-bottom:1px solid var(--borda); padding:16px 24px; position:sticky; top:66px; z-index:100; box-shadow:0 2px 8px rgba(26,79,139,.06); }
+    .filtros-inner { max-width:1200px; margin:0 auto; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .busca-wrap { flex:1; min-width:220px; position:relative; }
+    .busca-wrap input { width:100%; padding:10px 14px 10px 40px; border:1.5px solid #D8E0EA; border-radius:5px; font-family:var(--fonte-corpo)!important; font-size:15px!important; outline:none; transition:border-color .2s; }
+    .busca-wrap input:focus { border-color:var(--azul); }
+    .busca-wrap .ico { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#AAA; font-size:16px; }
+    .filtro-select { padding:10px 14px; border:1.5px solid #D8E0EA; border-radius:5px; font-family:var(--fonte-corpo)!important; font-size:15px!important; color:var(--texto); background:#FAFBFD; outline:none; cursor:pointer; }
+    .filtro-select:focus { border-color:var(--azul); }
+
+    .bib-body { background:var(--cinza-claro); padding:36px 24px 64px; }
+    .bib-inner { max-width:1200px; margin:0 auto; }
+
+    .secao-label { font-family:var(--fonte-titulo); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#888; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+    .secao-label::after { content:''; flex:1; height:1px; background:#E0E6F0; }
+
+    .cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:20px; margin-bottom:40px; }
+
+    .card-obra { background:#fff; border-radius:10px; border:1px solid var(--borda); overflow:hidden; text-decoration:none; display:flex; flex-direction:column; transition:box-shadow .2s, transform .15s; }
+    .card-obra:hover { box-shadow:0 8px 28px rgba(26,79,139,.12); transform:translateY(-2px); text-decoration:none; }
+
+    .card-icone { width:100%; height:130px; background:var(--azul-escuro); display:flex; align-items:center; justify-content:center; font-size:52px; position:relative; overflow:hidden; }
+    .card-icone img { width:100%; height:100%; object-fit:cover; }
+    .card-status-badge { position:absolute; top:8px; right:8px; font-family:var(--fonte-titulo); font-size:11px; font-weight:700; padding:3px 9px; border-radius:3px; text-transform:uppercase; letter-spacing:.5px; }
+    .badge-andamento { background:rgba(255,183,77,.2); color:#E65100; border:1px solid rgba(255,183,77,.5); }
+    .badge-concluida { background:rgba(46,125,50,.15); color:#2E7D32; border:1px solid rgba(46,125,50,.4); }
+
+    .card-info { padding:14px 16px 18px; flex:1; display:flex; flex-direction:column; gap:6px; }
+    .card-apelido { font-family:var(--fonte-titulo); font-size:1rem; font-weight:700; color:var(--azul-escuro); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .card-meta { font-size:13px; color:#AAA; }
+
+    .card-nova { background:transparent; border:2px dashed #C8D5E8; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:210px; text-decoration:none; color:#8AADD4; font-family:var(--fonte-titulo); font-size:14px; font-weight:700; transition:border-color .2s, color .2s, background .2s; }
+    .card-nova:hover { border-color:var(--verde); color:var(--verde); background:rgba(46,125,50,.04); text-decoration:none; }
+    .card-nova .plus { font-size:32px; line-height:1; }
+
+    .vazio { text-align:center; padding:48px 24px; color:#AAA; }
+    .vazio .ico { font-size:40px; margin-bottom:12px; }
+
+    /* modal nova caderneta */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(10,22,40,.65); z-index:8888; align-items:center; justify-content:center; padding:24px; backdrop-filter:blur(2px); }
+    .modal-overlay.aberto { display:flex; }
+    .modal-box { background:#fff; border-radius:10px; border-top:4px solid var(--azul); max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.3); overflow:hidden; }
+    .modal-header { padding:24px 28px 0; display:flex; justify-content:space-between; align-items:center; }
+    .modal-header h2 { font-family:var(--fonte-titulo); font-size:1.2rem!important; font-weight:800; color:var(--azul-escuro); }
+    .modal-fechar { background:none; border:none; cursor:pointer; color:#AAA; font-size:20px; }
+    .modal-fechar:hover { color:#444; }
+    .modal-body { padding:20px 28px; display:flex; flex-direction:column; gap:14px; }
+    .modal-body label { font-size:13px; font-weight:700; color:#4A5A6A; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:5px; }
+    .modal-body input[type="text"] { width:100%; padding:10px 14px; border:1.5px solid #D8E0EA; border-radius:5px; font-family:var(--fonte-corpo)!important; font-size:16px!important; outline:none; transition:border-color .2s; }
+    .modal-body input:focus { border-color:var(--azul); }
+    .modal-body .hint { font-size:13px; color:#AAA; margin-top:4px; }
+    .modal-footer { padding:16px 28px 24px; border-top:1px solid #F0F0EA; background:#FAFAF8; display:flex; gap:10px; justify-content:flex-end; }
+    .btn-cancelar { background:none; border:1.5px solid #DDD; color:#888; padding:9px 20px; border-radius:5px; font-family:var(--fonte-titulo); font-size:14px; font-weight:700; cursor:pointer; }
+    .btn-cancelar:hover { border-color:#AAA; color:#555; }
+    .btn-criar { background:var(--verde); color:#fff; border:none; padding:9px 24px; border-radius:5px; font-family:var(--fonte-titulo); font-size:14px; font-weight:700; cursor:pointer; transition:background .2s; }
+    .btn-criar:hover { background:var(--verde-claro); }
+
+    @media(max-width:600px) { .cards-grid { grid-template-columns:1fr 1fr; } }
+</style>
+
+<section class="bib-hero">
+    <div class="bib-hero-inner">
+        <div>
+            <h1>&#128218; Minhas <span>Cadernetas</span></h1>
+            <p>Biblioteca de obras — CREA Adamantina</p>
+        </div>
+        <a href="#" class="btn-nova" onclick="abrirModal(); return false;">&#43; Nova Caderneta</a>
+    </div>
+</section>
+
+<div class="bib-filtros">
+    <div class="filtros-inner">
+        <div class="busca-wrap">
+            <span class="ico">&#128269;</span>
+            <input type="text" id="campoBusca" placeholder="Buscar caderneta pelo nome..." oninput="filtrar()">
+        </div>
+        <select class="filtro-select" id="filtroAno" onchange="filtrar()">
+            <option value="">Todos os anos</option>
+            {% for ano in anos %}
+            <option value="{{ ano }}">{{ ano }}</option>
+            {% endfor %}
+        </select>
+        <select class="filtro-select" id="filtroStatus" onchange="filtrar()">
+            <option value="">Todos os status</option>
+            <option value="andamento">Em andamento</option>
+            <option value="concluida">Concluídas</option>
+        </select>
+    </div>
+</div>
+
+<section class="bib-body">
+    <div class="bib-inner">
+
+        <div id="secaoAndamento">
+            <div class="secao-label">&#9203; Em andamento</div>
+            <div class="cards-grid" id="gridAndamento">
+                {% for c in cadernetas_andamento %}
+                <a href="{% url 'detalhe_caderneta' c.pk %}" class="card-obra"
+                   data-apelido="{{ c.apelido|lower }}"
+                   data-ano="{{ c.ano }}"
+                   data-status="andamento">
+                    <div class="card-icone">
+                        {% if c.icone %}
+                            <img src="{{ c.icone.url }}" alt="{{ c.apelido }}">
+                        {% else %}
+                            &#127963;&#65039;
+                        {% endif %}
+                        <span class="card-status-badge badge-andamento">Em andamento</span>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-apelido">{{ c.apelido }}</div>
+                        <div class="card-meta">&#128197; {{ c.criado_em|date:"d/m/Y" }}</div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="vazio" id="vazioAndamento"><div class="ico">&#128203;</div>Nenhuma obra em andamento.</div>
+                {% endfor %}
+                <a href="#" class="card-nova" onclick="abrirModal(); return false;">
+                    <span class="plus">&#43;</span>
+                    Nova caderneta
+                </a>
+            </div>
+        </div>
+
+        <div id="secaoConcluida">
+            <div class="secao-label">&#9989; Concluídas</div>
+            <div class="cards-grid" id="gridConcluida">
+                {% for c in cadernetas_concluidas %}
+                <a href="{% url 'detalhe_caderneta' c.pk %}" class="card-obra"
+                   data-apelido="{{ c.apelido|lower }}"
+                   data-ano="{{ c.ano }}"
+                   data-status="concluida">
+                    <div class="card-icone">
+                        {% if c.icone %}
+                            <img src="{{ c.icone.url }}" alt="{{ c.apelido }}">
+                        {% else %}
+                            &#127963;&#65039;
+                        {% endif %}
+                        <span class="card-status-badge badge-concluida">Concluída</span>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-apelido">{{ c.apelido }}</div>
+                        <div class="card-meta">&#128197; {{ c.criado_em|date:"d/m/Y" }}</div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="vazio"><div class="ico">&#9989;</div>Nenhuma obra concluída ainda.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Modal nova caderneta -->
+<div class="modal-overlay" id="modalNova">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>&#128218; Nova Caderneta</h2>
+            <button class="modal-fechar" onclick="fecharModal()">&#10005;</button>
+        </div>
+        <form method="post" action="{% url 'criar_caderneta' %}">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div>
+                    <label for="id_apelido">Nome / Apelido da obra <span style="color:#C0392B">*</span></label>
+                    <input type="text" name="apelido" id="id_apelido"
+                           placeholder="Ex: Reforma Sede CREA, Casa Silva..." required maxlength="150">
+                    <p class="hint">Usado apenas para identificar a obra na biblioteca.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+                <button type="submit" class="btn-criar">&#43; Criar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirModal() { document.getElementById('modalNova').classList.add('aberto'); }
+function fecharModal() { document.getElementById('modalNova').classList.remove('aberto'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModal(); });
+document.getElementById('modalNova').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalNova')) fecharModal();
+});
+
+function filtrar() {
+    const busca  = document.getElementById('campoBusca').value.toLowerCase();
+    const ano    = document.getElementById('filtroAno').value;
+    const status = document.getElementById('filtroStatus').value;
+
+    document.querySelectorAll('.card-obra').forEach(card => {
+        const nomeOk   = card.dataset.apelido.includes(busca);
+        const anoOk    = !ano    || card.dataset.ano    === ano;
+        const statusOk = !status || card.dataset.status === status;
+        card.style.display = (nomeOk && anoOk && statusOk) ? '' : 'none';
+    });
+
+    // oculta seção inteira se filtro de status ativo
+    document.getElementById('secaoAndamento').style.display =
+        (!status || status === 'andamento') ? '' : 'none';
+    document.getElementById('secaoConcluida').style.display =
+        (!status || status === 'concluida') ? '' : 'none';
+}
+</script>
+{% endblock %}

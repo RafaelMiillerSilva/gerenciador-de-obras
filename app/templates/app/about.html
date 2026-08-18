@@ -1,0 +1,140 @@
+{% extends "app/layout.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .sobre-hero { background: var(--azul-escuro); padding: 72px 24px 80px; position: relative; overflow: hidden; }
+    .sobre-hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent, var(--verde), transparent); }
+    .sobre-hero::before { content: ''; position: absolute; top: -80px; left: -80px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(46,125,50,0.1) 0%, transparent 70%); pointer-events: none; }
+    .sobre-hero-inner { max-width: 700px; margin: 0 auto; text-align: center; position: relative; }
+    .page-tag { display: inline-block; background: rgba(46,125,50,0.15); border: 1px solid rgba(46,125,50,0.35); color: #6EC972; font-family: var(--fonte-titulo); font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 5px 14px; border-radius: 3px; margin-bottom: 18px; }
+    .sobre-hero h1 { font-family: var(--fonte-titulo); font-size: clamp(36px,5vw,56px) !important; font-weight: 800; color: #fff; line-height: 1.08; margin-bottom: 18px; }
+    .sobre-hero h1 em { font-style: normal; color: #6EC972; }
+    .sobre-hero p { color: #8AADD4; font-size: 19px; line-height: 1.7; }
+    .missao { padding: 72px 24px; background: var(--cinza-claro); }
+    .missao-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .missao-texto h2 { font-family: var(--fonte-titulo); font-size: 38px !important; font-weight: 800; color: var(--azul-escuro); line-height: 1.1; margin-bottom: 18px; }
+    .missao-texto h2 span { color: var(--verde); }
+    .missao-texto p { color: #666; font-size: 18px; line-height: 1.75; margin-bottom: 16px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; border-radius: 10px; overflow: hidden; border: 2px solid var(--borda); }
+    .stat-box { background: #fff; padding: 32px 28px; text-align: center; border: 1px solid #EEEEEA; transition: background 0.2s; }
+    .stat-box:hover { background: #F5F8FF; }
+    .stat-numero { font-family: var(--fonte-titulo); font-size: 48px; font-weight: 800; color: var(--azul); line-height: 1; margin-bottom: 6px; }
+    .stat-label { color: #888; font-size: 15px; line-height: 1.4; }
+    .valores { background: #fff; padding: 72px 24px; border-top: 1px solid #EEEEEA; border-bottom: 1px solid #EEEEEA; }
+    .section-header { text-align: center; max-width: 580px; margin: 0 auto 52px; }
+    .section-tag { font-family: var(--fonte-titulo); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--verde); margin-bottom: 10px; }
+    .section-header h2 { font-family: var(--fonte-titulo); font-size: 36px !important; font-weight: 800; color: var(--azul-escuro); line-height: 1.1; margin-bottom: 12px; }
+    .section-header p { color: #777; font-size: 18px; line-height: 1.6; }
+    .valores-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .valor-card { padding: 32px 26px; border-radius: 8px; border: 1px solid var(--borda); border-top: 3px solid var(--azul); background: var(--cinza-claro); transition: box-shadow 0.2s; }
+    .valor-card:hover { box-shadow: 0 8px 28px rgba(26,79,139,0.08); }
+    .valor-icone { font-size: 32px; margin-bottom: 14px; display: block; }
+    .valor-card h3 { font-family: var(--fonte-titulo); font-size: 22px !important; font-weight: 700; color: var(--azul-escuro); margin-bottom: 10px; }
+    .valor-card p { color: #777; font-size: 17px; line-height: 1.65; }
+    .time { padding: 72px 24px; background: var(--cinza-claro); }
+    .time-grid { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+    .membro-card { background: #fff; border-radius: 8px; border: 1px solid var(--borda); overflow: hidden; text-align: center; transition: box-shadow 0.2s, transform 0.2s; }
+    .membro-card:hover { box-shadow: 0 10px 32px rgba(26,79,139,0.09); transform: translateY(-2px); }
+    .membro-avatar { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; font-size: 52px; background: var(--azul-escuro); border-bottom: 3px solid var(--verde); }
+    .membro-info { padding: 20px 18px 24px; }
+    .membro-nome { font-family: var(--fonte-titulo); font-size: 20px; font-weight: 700; color: var(--azul-escuro); margin-bottom: 4px; }
+    .membro-cargo { color: var(--verde); font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+    .membro-bio { color: #888; font-size: 15px; line-height: 1.55; }
+    .cta-section { background: var(--azul-escuro); padding: 72px 24px; text-align: center; position: relative; overflow: hidden; }
+    .cta-section::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent, var(--verde), transparent); }
+    .cta-section h2 { font-family: var(--fonte-titulo); font-size: 42px !important; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .cta-section p { color: #6A8FAF; font-size: 18px; margin-bottom: 36px; max-width: 460px; margin-left: auto; margin-right: auto; }
+    .cta-primary { background: var(--verde); color: #fff; padding: 15px 40px; border-radius: 5px; font-family: var(--fonte-titulo); font-size: 20px; font-weight: 700; text-decoration: none; display: inline-block; transition: background 0.2s, transform 0.15s; }
+    .cta-primary:hover { background: var(--verde-claro); color: #fff; text-decoration: none; transform: translateY(-1px); }
+    @media (max-width: 768px) { .missao-inner { grid-template-columns: 1fr; gap: 40px; } .valores-grid { grid-template-columns: 1fr; } .time-grid { grid-template-columns: 1fr; max-width: 380px; } }
+</style>
+
+<section class="sobre-hero">
+    <div class="sobre-hero-inner">
+        <div class="page-tag">Quem somos</div>
+        <h1>O sistema de obras<br><em>do CREA Adamantina.</em></h1>
+        <p>Este sistema foi desenvolvido para modernizar a gest&atilde;o e documenta&ccedil;&atilde;o das obras do CREA de Adamantina, trazendo organiza&ccedil;&atilde;o, rastreabilidade e agilidade para todos os envolvidos.</p>
+    </div>
+</section>
+
+<section class="missao">
+    <div class="missao-inner">
+        <div class="missao-texto">
+            <h2>Nossa <span>miss&atilde;o</span></h2>
+            <p>Acreditamos que toda obra p&uacute;blica merece documenta&ccedil;&atilde;o rigorosa. Registros bem feitos protegem o servidor, garantem transpar&ecirc;ncia e asseguram a qualidade da entrega para a sociedade.</p>
+            <p>Este sistema torna esse processo simples, digital e acess&iacute;vel. Sem planilhas confusas, sem papelada perdida.</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-box"><div class="stat-numero">100%</div><div class="stat-label">Digital</div></div>
+            <div class="stat-box"><div class="stat-numero">3</div><div class="stat-label">N&iacute;veis de acesso</div></div>
+            <div class="stat-box"><div class="stat-numero">PDF</div><div class="stat-label">Exporta&ccedil;&atilde;o instant&acirc;nea</div></div>
+            <div class="stat-box"><div class="stat-numero">2024</div><div class="stat-label">Ano de implanta&ccedil;&atilde;o</div></div>
+        </div>
+    </div>
+</section>
+
+<section class="valores">
+    <div class="section-header">
+        <div class="section-tag">O que nos guia</div>
+        <h2>Nossos valores</h2>
+        <p>Princ&iacute;pios que orientam cada decis&atilde;o do sistema e da equipe.</p>
+    </div>
+    <div class="valores-grid">
+        <div class="valor-card">
+            <span class="valor-icone">&#127959;&#65039;</span>
+            <h3>Praticidade</h3>
+            <p>Tudo foi pensado para ser usado em campo, com uma m&atilde;o ocupada e o sol na tela. Simples de verdade.</p>
+        </div>
+        <div class="valor-card">
+            <span class="valor-icone">&#128274;</span>
+            <h3>Seguran&ccedil;a</h3>
+            <p>Acesso restrito a servidores autorizados. Cada n&iacute;vel v&ecirc; apenas o que lhe compete.</p>
+        </div>
+        <div class="valor-card">
+            <span class="valor-icone">&#128208;</span>
+            <h3>Precis&atilde;o</h3>
+            <p>Valorizamos o registro correto. Um bom documento de obra &eacute; t&atilde;o importante quanto o projeto em si.</p>
+        </div>
+    </div>
+</section>
+
+<section class="time">
+    <div class="section-header">
+        <div class="section-tag">Equipe t&eacute;cnica</div>
+        <h2>Quem mant&eacute;m o sistema</h2>
+        <p>Profissionais dedicados &agrave; gest&atilde;o e manuten&ccedil;&atilde;o do sistema de obras do CREA Adamantina.</p>
+    </div>
+    <div class="time-grid">
+        <div class="membro-card">
+            <div class="membro-avatar">&#127959;&#65039;</div>
+            <div class="membro-info">
+                <div class="membro-nome">Administrador Geral</div>
+                <div class="membro-cargo">N&iacute;vel 1 &mdash; Dev</div>
+                <div class="membro-bio">Respons&aacute;vel pela gest&atilde;o completa do sistema, usu&aacute;rios e configura&ccedil;&otilde;es.</div>
+            </div>
+        </div>
+        <div class="membro-card">
+            <div class="membro-avatar">&#128101;</div>
+            <div class="membro-info">
+                <div class="membro-nome">Gestor de Obras</div>
+                <div class="membro-cargo">N&iacute;vel 2 &mdash; Gestor</div>
+                <div class="membro-bio">Aprova cadastros de engenheiros e acompanha o andamento das obras.</div>
+            </div>
+        </div>
+        <div class="membro-card">
+            <div class="membro-avatar">&#9881;&#65039;</div>
+            <div class="membro-info">
+                <div class="membro-nome">Engenheiro</div>
+                <div class="membro-cargo">N&iacute;vel 3 &mdash; Usu&aacute;rio</div>
+                <div class="membro-bio">Registra etapas, atualiza cadernetas e gera relat&oacute;rios de obras.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <h2>Precisa de acesso?</h2>
+    <p>Solicite seu cadastro e aguarde a aprova&ccedil;&atilde;o do administrador do CREA Adamantina.</p>
+    <a href="{% url 'solicitar_cadastro' %}" class="cta-primary">Solicitar Cadastro &rarr;</a>
+</section>
+{% endblock %}

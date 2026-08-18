@@ -1,0 +1,202 @@
+﻿{% extends "app/layout.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .det-hero { background:var(--azul-escuro); padding:32px 24px 40px; position:relative; overflow:hidden; }
+    .det-hero::after { content:''; position:absolute; bottom:0; left:0; right:0; height:4px; background:linear-gradient(90deg,transparent,var(--verde),transparent); }
+    .det-hero-inner { max-width:1000px; margin:0 auto; display:flex; align-items:center; gap:20px; }
+    .det-icone { width:64px; height:64px; border-radius:10px; background:var(--azul); border:2px solid #1E3F6A; display:flex; align-items:center; justify-content:center; font-size:32px; flex-shrink:0; overflow:hidden; }
+    .det-icone img { width:100%; height:100%; object-fit:cover; }
+    .det-titulo h1 { font-family:var(--fonte-titulo); font-size:1.7rem!important; font-weight:800; color:#fff; margin-bottom:4px; }
+    .det-titulo p { color:#8AADD4; font-size:14px; }
+    .voltar { color:#8AADD4; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; margin-bottom:12px; transition:color .2s; }
+    .voltar:hover { color:#fff; text-decoration:none; }
+
+    .det-body { background:var(--cinza-claro); padding:36px 24px 64px; }
+    .det-inner { max-width:1000px; margin:0 auto; display:flex; flex-direction:column; gap:0; }
+
+    .divisoria { background:#fff; border:1px solid var(--borda); border-radius:10px; margin-bottom:20px; overflow:hidden; }
+    .div-header { background:var(--azul-escuro); padding:16px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .div-header h2 { font-family:var(--fonte-titulo); font-size:1rem!important; font-weight:800; color:#fff; letter-spacing:.5px; display:flex; align-items:center; gap:10px; }
+    .div-body { padding:20px 24px; }
+
+    .docs-lista { display:flex; flex-direction:column; gap:10px; }
+    .doc-card { display:flex; align-items:center; gap:14px; padding:14px 16px; border:1.5px solid var(--borda); border-radius:8px; text-decoration:none; color:var(--texto); transition:border-color .2s, background .2s; }
+    .doc-card:hover { border-color:var(--azul); background:#F7F9FC; text-decoration:none; }
+    .doc-card.concluido { border-color:#C8E6C9; background:#F9FFF9; }
+    .doc-card.concluido:hover { border-color:#81C784; }
+    .doc-icone-status { width:38px; height:38px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+    .doc-icone-status.andamento { background:rgba(255,183,77,.12); }
+    .doc-icone-status.pronto   { background:rgba(26,79,139,.1); }
+    .doc-icone-status.concluido { background:rgba(46,125,50,.12); }
+    .doc-info { flex:1; }
+    .doc-nome { font-weight:700; color:var(--azul-escuro); font-size:15px; }
+    .doc-meta { font-size:13px; color:#AAA; margin-top:2px; }
+    .doc-badge { font-family:var(--fonte-titulo); font-size:11px; font-weight:700; padding:3px 10px; border-radius:3px; text-transform:uppercase; white-space:nowrap; }
+    .badge-and { background:rgba(255,183,77,.15); color:#E65100; }
+    .badge-pron { background:rgba(26,79,139,.12); color:var(--azul); }
+    .badge-conc { background:rgba(46,125,50,.12); color:#2E7D32; }
+
+    .btn-add { background:none; border:2px dashed #C8D5E8; color:#8AADD4; padding:14px; border-radius:8px; width:100%; display:flex; align-items:center; justify-content:center; gap:10px; font-family:var(--fonte-titulo); font-size:14px; font-weight:700; cursor:pointer; transition:border-color .2s, color .2s, background .2s; text-decoration:none; }
+    .btn-add:hover { border-color:var(--verde); color:var(--verde); background:rgba(46,125,50,.04); text-decoration:none; }
+    .btn-add.desabilitado { opacity:.4; cursor:not-allowed; pointer-events:none; border-color:#D8E0EA; color:#AAA; }
+
+    .vazio-div { text-align:center; color:#CCC; font-size:14px; padding:8px 0 16px; }
+    
+    .alerta-info { background:rgba(26,79,139,.1); border-left:4px solid var(--azul); padding:12px 16px; border-radius:4px; font-size:13px; color:var(--azul-escuro); margin-bottom:16px; }
+</style>
+
+<section class="det-hero">
+    <div class="det-hero-inner">
+        <div>
+            <a href="{% url 'cadernetas' %}" class="voltar">- Biblioteca de cadernetas</a>
+        </div>
+    </div>
+    <div style="max-width:1000px; margin:0 auto; display:flex; align-items:center; gap:20px;">
+        <div class="det-icone">
+            {% if caderneta.icone %}
+                <img src="{{ caderneta.icone.url }}" alt="{{ caderneta.apelido }}">
+            {% else %}
+                🏗️
+            {% endif %}
+        </div>
+        <div class="det-titulo">
+            <h1>{{ caderneta.apelido }}</h1>
+            <p>Criada em {{ caderneta.criado_em|date:"d/m/Y" }}
+               -
+               {% if caderneta.concluida %}
+                   <span style="color:#6EC972">OK Concluida</span>
+               {% else %}
+                   <span style="color:#FFB74D">! Em andamento</span>
+               {% endif %}
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="det-body">
+    <div class="det-inner">
+
+        <!-- DIVISÓRIA 1: RECIBO -->
+        <div class="divisoria">
+            <div class="div-header">
+                <h2>📋 Recibo</h2>
+            </div>
+            <div class="div-body">
+                {% if recibo %}
+                    <div class="docs-lista">
+                        <a href="{% url 'detalhe_recibo' recibo.pk %}"
+                           class="doc-card {% if recibo.status == 'concluido' %}concluido{% endif %}">
+                            <div class="doc-icone-status {% if recibo.status == 'concluido' %}concluido{% elif recibo.status == 'pronto_assinar' %}pronto{% else %}andamento{% endif %}">
+                                {% if recibo.status == 'concluido' %}OK
+                                {% elif recibo.status == 'pronto_assinar' %}~
+                                {% else %}...{% endif %}
+                            </div>
+                            <div class="doc-info">
+                                <div class="doc-nome">Recibo - {{ recibo.local_obra }}</div>
+                                <div class="doc-meta">{{ recibo.criado_em|date:"d/m/Y" }} . {{ recibo.empresa }}</div>
+                            </div>
+                            <span class="doc-badge
+                                {% if recibo.status == 'concluido' %}badge-conc
+                                {% elif recibo.status == 'pronto_assinar' %}badge-pron
+                                {% else %}badge-and{% endif %}">
+                                {{ recibo.get_status_display }}
+                            </span>
+                        </a>
+                    </div>
+                {% else %}
+                    <p class="vazio-div">Nenhum recibo criado ainda.</p>
+                    <a href="{% url 'criar_recibo' caderneta.pk %}" class="btn-add">
+                        <span style="font-size:22px">+</span> Adicionar Recibo
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- DIVISÓRIA 2: RELATOS DE VISITA -->
+        <div class="divisoria">
+            <div class="div-header">
+                <h2>📍 Relatos de Visita</h2>
+            </div>
+            <div class="div-body">
+                {% if not recibo %}
+                <div class="alerta-info">
+                    Crie um recibo antes de adicionar relatos de visita.
+                </div>
+                {% endif %}
+                <div class="docs-lista">
+                    {% for r in relatos %}
+                    <a href="{% url 'detalhe_relato' r.pk %}"
+                       class="doc-card {% if r.status == 'concluido' %}concluido{% endif %}">
+                        <div class="doc-icone-status {% if r.status == 'concluido' %}concluido{% elif r.status == 'pronto_assinar' %}pronto{% else %}andamento{% endif %}">
+                            {% if r.status == 'concluido' %}OK
+                            {% elif r.status == 'pronto_assinar' %}~
+                            {% else %}...{% endif %}
+                        </div>
+                        <div class="doc-info">
+                            <div class="doc-nome">Visita - {{ r.data|date:"d/m/Y" }}</div>
+                            <div class="doc-meta">{{ r.conformidade|capfirst }}</div>
+                        </div>
+                        <span class="doc-badge
+                            {% if r.status == 'concluido' %}badge-conc
+                            {% elif r.status == 'pronto_assinar' %}badge-pron
+                            {% else %}badge-and{% endif %}">
+                            {{ r.get_status_display }}
+                        </span>
+                    </a>
+                    {% empty %}
+                    <p class="vazio-div">Nenhum relato de visita ainda.</p>
+                    {% endfor %}
+                </div>
+                <div style="margin-top:12px;">
+                    <a href="{% url 'criar_relato' caderneta.pk %}" class="btn-add {% if not recibo %}desabilitado{% endif %}">
+                        <span style="font-size:22px">+</span> Adicionar Relato de Visita
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIVISÓRIA 3: TERMO DE CONCLUSÃO -->
+        <div class="divisoria">
+            <div class="div-header">
+                <h2>📄 Termo de Conclusao</h2>
+            </div>
+            <div class="div-body">
+                {% if not recibo %}
+                <div class="alerta-info">
+                    Crie um recibo antes de gerar um termo de conclusao.
+                </div>
+                {% endif %}
+                {% if termo %}
+                    <div class="docs-lista">
+                        <a href="{% url 'detalhe_termo' termo.pk %}"
+                           class="doc-card {% if termo.status == 'concluido' %}concluido{% endif %}">
+                            <div class="doc-icone-status {% if termo.status == 'concluido' %}concluido{% elif termo.status == 'pronto_assinar' %}pronto{% else %}andamento{% endif %}">
+                                {% if termo.status == 'concluido' %}OK
+                                {% elif termo.status == 'pronto_assinar' %}~
+                                {% else %}...{% endif %}
+                            </div>
+                            <div class="doc-info">
+                                <div class="doc-nome">Termo de Conclusao</div>
+                                <div class="doc-meta">Criado em {{ termo.criado_em|date:"d/m/Y" }}</div>
+                            </div>
+                            <span class="doc-badge
+                                {% if termo.status == 'concluido' %}badge-conc
+                                {% elif termo.status == 'pronto_assinar' %}badge-pron
+                                {% else %}badge-and{% endif %}">
+                                {{ termo.get_status_display }}
+                            </span>
+                        </a>
+                    </div>
+                {% else %}
+                    <p class="vazio-div">Nenhum termo criado ainda.</p>
+                    <a href="{% url 'criar_termo' caderneta.pk %}" class="btn-add {% if not recibo %}desabilitado{% endif %}">
+                        <span style="font-size:22px">+</span> Gerar Termo de Conclusao
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

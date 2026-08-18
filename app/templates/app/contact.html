@@ -1,0 +1,210 @@
+{% extends "app/layout.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .contato-hero { background: var(--azul-escuro); padding: 72px 24px 80px; text-align: center; position: relative; overflow: hidden; }
+    .contato-hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent, var(--verde), transparent); }
+    .page-tag { display: inline-block; background: rgba(46,125,50,0.15); border: 1px solid rgba(46,125,50,0.35); color: #6EC972; font-family: var(--fonte-titulo); font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 5px 14px; border-radius: 3px; margin-bottom: 18px; }
+    .contato-hero h1 { font-family: var(--fonte-titulo); font-size: clamp(36px,5vw,54px) !important; font-weight: 800; color: #fff; line-height: 1.08; margin-bottom: 16px; }
+    .contato-hero h1 em { font-style: normal; color: #6EC972; }
+    .contato-hero p { color: #8AADD4; font-size: 19px; max-width: 520px; margin: 0 auto; line-height: 1.65; }
+    .contato-body { padding: 64px 24px 80px; background: var(--cinza-claro); }
+    .contato-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.6fr; gap: 48px; align-items: start; }
+    .contato-info { display: flex; flex-direction: column; gap: 16px; }
+    .info-card { background: #fff; border: 1px solid var(--borda); border-left: 4px solid var(--azul); border-radius: 0 8px 8px 0; padding: 22px; display: flex; gap: 16px; align-items: flex-start; transition: box-shadow 0.2s; }
+    .info-card:hover { box-shadow: 0 6px 20px rgba(26,79,139,0.08); }
+    .info-icone { font-size: 26px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+    .info-conteudo h3 { font-family: var(--fonte-titulo); font-size: 18px !important; font-weight: 700; color: var(--azul-escuro); margin-bottom: 4px; }
+    .info-conteudo p, .info-conteudo a { color: #777; font-size: 16px; line-height: 1.55; text-decoration: none; }
+    .info-conteudo a:hover { color: var(--azul); }
+    .horario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; margin-top: 4px; }
+    .horario-linha { font-size: 15px; color: #888; }
+    .horario-linha strong { color: #555; font-weight: 600; }
+    .form-card { background: #fff; border-radius: 10px; border: 1px solid var(--borda); border-top: 4px solid var(--azul); overflow: hidden; }
+    .form-header { padding: 28px 32px 0; }
+    .form-header h2 { font-family: var(--fonte-titulo); font-size: 28px !important; font-weight: 800; color: var(--azul-escuro); margin-bottom: 6px; }
+    .form-header p { color: #999; font-size: 16px; }
+    .form-body { padding: 24px 32px 32px; display: flex; flex-direction: column; gap: 18px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-group label { font-size: 14px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+    .field-group label .req { color: #C0392B; margin-left: 2px; }
+    .field-group input, .field-group select, .field-group textarea { width: 100%; padding: 11px 14px; border: 1.5px solid #DDD; border-radius: 5px; font-family: var(--fonte-corpo); font-size: 17px; color: var(--texto); background: #FAFAFA; outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; resize: vertical; }
+    .field-group input::placeholder, .field-group textarea::placeholder { color: #C0C0C0; }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(26,79,139,0.12); background: #fff; }
+    .form-footer { padding: 20px 32px 28px; border-top: 1px solid #F0F0EA; background: #FAFAF8; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .form-footer p { color: #AAA; font-size: 15px; }
+    .btn-enviar { background: var(--azul); color: #fff; border: none; padding: 13px 36px; border-radius: 5px; font-family: var(--fonte-titulo); font-size: 19px; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+    .btn-enviar:hover { background: var(--azul-claro); transform: translateY(-1px); }
+    .sucesso-msg { display: none; background: #f0faf0; border: 1px solid #b2dfb2; border-radius: 8px; padding: 18px 22px; color: #2e7d32; font-size: 17px; align-items: center; gap: 12px; margin-top: 16px; }
+    .sucesso-msg.ativo { display: flex; }
+    .faq { padding: 64px 24px 80px; background: #fff; border-top: 1px solid #EEEEEA; }
+    .section-header { text-align: center; max-width: 560px; margin: 0 auto 48px; }
+    .section-tag { font-family: var(--fonte-titulo); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--verde); margin-bottom: 10px; }
+    .section-header h2 { font-family: var(--fonte-titulo); font-size: 34px !important; font-weight: 800; color: var(--azul-escuro); }
+    .faq-lista { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 2px; }
+    .faq-item { border: 1px solid var(--borda); border-radius: 6px; overflow: hidden; background: var(--cinza-claro); }
+    .faq-pergunta { width: 100%; background: none; border: none; text-align: left; padding: 20px 24px; font-family: var(--fonte-titulo); font-size: 18px; font-weight: 700; color: var(--azul-escuro); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: background 0.2s; }
+    .faq-pergunta:hover { background: #EEF2F8; }
+    .faq-seta { font-size: 14px; color: var(--azul); transition: transform 0.25s; flex-shrink: 0; }
+    .faq-item.aberto .faq-seta { transform: rotate(180deg); }
+    .faq-resposta { display: none; padding: 0 24px 20px; color: #777; font-size: 17px; line-height: 1.7; border-top: 1px solid var(--borda); }
+    .faq-item.aberto .faq-resposta { display: block; }
+    @media (max-width: 768px) { .contato-grid { grid-template-columns: 1fr; } .field-row { grid-template-columns: 1fr; } .form-header, .form-body { padding-left: 20px; padding-right: 20px; } .form-footer { padding: 16px 20px; flex-direction: column; align-items: stretch; } }
+</style>
+
+<section class="contato-hero">
+    <div class="page-tag">Fale conosco</div>
+    <h1>Estamos aqui para<br><em>te ajudar.</em></h1>
+    <p>D&uacute;vidas, sugest&otilde;es ou problemas com o sistema? Nossa equipe responde em at&eacute; 1 dia &uacute;til.</p>
+</section>
+
+<section class="contato-body">
+    <div class="contato-grid">
+        <div class="contato-info">
+            <div class="info-card">
+                <div class="info-icone">&#128231;</div>
+                <div class="info-conteudo">
+                    <h3>E-mail</h3>
+                    <a href="mailto:ti@crea-adamantina.gov.br">ti@crea-adamantina.gov.br</a><br>
+                    <a href="mailto:suporte@crea-adamantina.gov.br">suporte@crea-adamantina.gov.br</a>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-icone">&#128241;</div>
+                <div class="info-conteudo">
+                    <h3>Telefone</h3>
+                    <a href="#">(18) 3522-0000</a>
+                    <p style="margin-top:4px;font-size:14px;">Ramal administrativo</p>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-icone">&#128205;</div>
+                <div class="info-conteudo">
+                    <h3>Endere&ccedil;o</h3>
+                    <p>Av. Marginal, s/n &mdash; Centro<br>Adamantina &mdash; SP<br>CEP 17800-000</p>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-icone">&#128336;</div>
+                <div class="info-conteudo">
+                    <h3>Hor&aacute;rio de atendimento</h3>
+                    <div class="horario-grid">
+                        <span class="horario-linha"><strong>Seg&ndash;Sex</strong></span>
+                        <span class="horario-linha">08h &agrave;s 17h</span>
+                        <span class="horario-linha"><strong>S&aacute;bado</strong></span>
+                        <span class="horario-linha">Fechado</span>
+                        <span class="horario-linha"><strong>Domingo</strong></span>
+                        <span class="horario-linha">Fechado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="form-header">
+                <h2>Envie sua mensagem</h2>
+                <p>Preencha o formul&aacute;rio e retornaremos o mais r&aacute;pido poss&iacute;vel.</p>
+            </div>
+            <div class="form-body">
+                <div class="field-row">
+                    <div class="field-group">
+                        <label>Nome <span class="req">*</span></label>
+                        <input type="text" id="c_nome" placeholder="Seu nome completo" autocomplete="name">
+                    </div>
+                    <div class="field-group">
+                        <label>E-mail <span class="req">*</span></label>
+                        <input type="email" id="c_email" placeholder="seu@email.com" autocomplete="email">
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field-group">
+                        <label>Telefone</label>
+                        <input type="tel" id="c_tel" placeholder="(00) 90000-0000" oninput="mascaraTel(this)" maxlength="15" autocomplete="tel">
+                    </div>
+                    <div class="field-group">
+                        <label>Assunto <span class="req">*</span></label>
+                        <select id="c_assunto">
+                            <option value="">Selecione...</option>
+                            <option>D&uacute;vida sobre o sistema</option>
+                            <option>Problema t&eacute;cnico</option>
+                            <option>Solicita&ccedil;&atilde;o de acesso</option>
+                            <option>Sugest&atilde;o de melhoria</option>
+                            <option>Outro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>Mensagem <span class="req">*</span></label>
+                    <textarea id="c_mensagem" rows="5" placeholder="Descreva sua d&uacute;vida ou mensagem com o m&aacute;ximo de detalhes..."></textarea>
+                </div>
+                <div class="sucesso-msg" id="msgSucesso">
+                    &#9989; Mensagem enviada! Retornaremos em breve.
+                </div>
+            </div>
+            <div class="form-footer">
+                <p>* Campos obrigat&oacute;rios</p>
+                <button class="btn-enviar" onclick="enviarForm()">Enviar mensagem &rarr;</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="faq">
+    <div class="section-header">
+        <div class="section-tag">D&uacute;vidas frequentes</div>
+        <h2>Perguntas mais comuns</h2>
+    </div>
+    <div class="faq-lista">
+        <div class="faq-item">
+            <button class="faq-pergunta" onclick="toggleFaq(this)">Como solicito meu cadastro no sistema? <span class="faq-seta">&#9660;</span></button>
+            <div class="faq-resposta">Clique em "Solicitar Cadastro" no menu ou na p&aacute;gina inicial, preencha seus dados e aguarde a aprova&ccedil;&atilde;o de um administrador. Voc&ecirc; receber&aacute; um e-mail com suas credenciais ap&oacute;s a aprova&ccedil;&atilde;o.</div>
+        </div>
+        <div class="faq-item">
+            <button class="faq-pergunta" onclick="toggleFaq(this)">Posso acessar o sistema pelo celular? <span class="faq-seta">&#9660;</span></button>
+            <div class="faq-resposta">Sim. O sistema funciona em qualquer navegador &mdash; desktop, tablet ou smartphone. N&atilde;o &eacute; necess&aacute;rio instalar nenhum aplicativo.</div>
+        </div>
+        <div class="faq-item">
+            <button class="faq-pergunta" onclick="toggleFaq(this)">Como funciona a exporta&ccedil;&atilde;o em PDF? <span class="faq-seta">&#9660;</span></button>
+            <div class="faq-resposta">Dentro de qualquer caderneta de obra, voc&ecirc; encontra o bot&atilde;o "Exportar PDF". O sistema gera um documento formatado com todas as informa&ccedil;&otilde;es da obra, pronto para arquivar ou enviar.</div>
+        </div>
+        <div class="faq-item">
+            <button class="faq-pergunta" onclick="toggleFaq(this)">Esqueci minha senha. O que fa&ccedil;o? <span class="faq-seta">&#9660;</span></button>
+            <div class="faq-resposta">Entre em contato com o administrador do sistema pelo e-mail ou telefone indicados nesta p&aacute;gina. Ele poder&aacute; redefinir sua senha.</div>
+        </div>
+        <div class="faq-item">
+            <button class="faq-pergunta" onclick="toggleFaq(this)">Minha solicita&ccedil;&atilde;o foi negada. O que fazer? <span class="faq-seta">&#9660;</span></button>
+            <div class="faq-resposta">Voc&ecirc; receber&aacute; um e-mail com o motivo da nega&ccedil;&atilde;o. Em caso de d&uacute;vidas, entre em contato diretamente com a administra&ccedil;&atilde;o do CREA Adamantina.</div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function mascaraTel(input) {
+        let v = input.value.replace(/\D/g,'').substring(0,11);
+        if (v.length>6) v='('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);
+        else if (v.length>2) v='('+v.slice(0,2)+') '+v.slice(2);
+        else if (v.length>0) v='('+v;
+        input.value=v;
+    }
+    function enviarForm() {
+        const nome=document.getElementById('c_nome').value.trim();
+        const email=document.getElementById('c_email').value.trim();
+        const assunto=document.getElementById('c_assunto').value;
+        const msg=document.getElementById('c_mensagem').value.trim();
+        if (!nome||!email||!assunto||!msg) { alert('Por favor, preencha todos os campos obrigat\u00f3rios.'); return; }
+        document.getElementById('msgSucesso').classList.add('ativo');
+        document.getElementById('c_nome').value='';
+        document.getElementById('c_email').value='';
+        document.getElementById('c_tel').value='';
+        document.getElementById('c_assunto').value='';
+        document.getElementById('c_mensagem').value='';
+    }
+    function toggleFaq(btn) {
+        const item=btn.closest('.faq-item');
+        const aberto=item.classList.contains('aberto');
+        document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('aberto'));
+        if (!aberto) item.classList.add('aberto');
+    }
+</script>
+{% endblock %}

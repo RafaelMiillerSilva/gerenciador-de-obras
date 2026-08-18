@@ -1,0 +1,106 @@
+{% extends "app/layout.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .hero { background: var(--azul-escuro); position: relative; overflow: hidden; padding: 80px 24px 90px; }
+    .hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 420px; height: 420px; background: radial-gradient(circle, rgba(46,125,50,0.12) 0%, transparent 70%); pointer-events: none; }
+    .hero-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .hero-badge { display: inline-block; background: rgba(46,125,50,0.15); border: 1px solid rgba(46,125,50,0.4); color: #6EC972; font-family: var(--fonte-titulo); font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 5px 14px; border-radius: 3px; margin-bottom: 20px; }
+    .hero h1 { font-family: var(--fonte-titulo); font-size: clamp(38px,4.5vw,62px); font-weight: 800; color: var(--branco); line-height: 1.06; margin-bottom: 20px; }
+    .hero h1 em { font-style: normal; color: #6EC972; }
+    .hero-desc { color: #8AADD4; font-size: 18px; line-height: 1.7; margin-bottom: 36px; max-width: 460px; }
+    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+    .cta-primary { background: var(--verde); color: #fff; padding: 14px 32px; border-radius: 4px; font-family: var(--fonte-titulo); font-size: 1.05rem; font-weight: 700; text-decoration: none; transition: background 0.2s, transform 0.1s; display: inline-block; }
+    .cta-primary:hover { background: var(--verde-claro); color: #fff; text-decoration: none; transform: translateY(-1px); }
+    .cta-secondary { border: 2px solid #3A5E8A; color: #8AADD4; padding: 12px 28px; border-radius: 4px; font-family: var(--fonte-titulo); font-size: 1.05rem; font-weight: 600; text-decoration: none; transition: border-color 0.2s, color 0.2s; display: inline-block; }
+    .cta-secondary:hover { border-color: var(--verde); color: #6EC972; text-decoration: none; }
+    .hero-illustration { background: var(--azul); border: 2px solid #1E3F6A; border-radius: 8px; padding: 28px; position: relative; }
+    .hero-illustration::before { content: ''; position: absolute; top: -3px; left: 24px; right: 24px; height: 3px; background: var(--verde); border-radius: 0 0 2px 2px; }
+    .caderneta-mock { background: var(--azul-escuro); border-radius: 6px; padding: 20px; border: 1px solid #1E3F6A; }
+    .caderneta-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #1E3F6A; }
+    .caderneta-icon { width: 36px; height: 36px; background: var(--verde); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .caderneta-title { font-family: var(--fonte-titulo); font-weight: 700; color: #fff; font-size: 17px; }
+    .caderneta-sub { color: #5A7A9A; font-size: 0.73rem; }
+    .caderneta-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1C3259; font-size: 15px; }
+    .caderneta-row:last-child { border-bottom: none; }
+    .caderneta-row .label { color: #5A7A9A; }
+    .caderneta-row .value { color: #8AADD4; font-weight: 500; }
+    .caderneta-row .value.ok { color: #4CAF50; }
+    .caderneta-row .value.pend { color: #FFB74D; }
+    .caderneta-footer { margin-top: 14px; display: flex; gap: 8px; }
+    .mock-btn { flex: 1; padding: 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600; text-align: center; font-family: var(--fonte-titulo); }
+    .mock-btn.verde { background: var(--verde); color: #fff; }
+    .mock-btn.ghost { background: transparent; border: 1px solid #2A4A6A; color: #5A7A9A; }
+    .features { padding: 80px 24px; background: var(--cinza-claro); }
+    .section-header { text-align: center; max-width: 600px; margin: 0 auto 56px; }
+    .section-tag { font-family: var(--fonte-titulo); font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--verde); margin-bottom: 10px; }
+    .section-header h2 { font-family: var(--fonte-titulo); font-size: clamp(28px,3vw,42px); font-weight: 800; color: var(--azul-escuro); line-height: 1.1; margin-bottom: 14px; }
+    .section-header p { color: #666; font-size: 17px; line-height: 1.6; }
+    .features-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .feature-card { background: #fff; border-radius: 8px; padding: 30px 26px; border: 1px solid var(--borda); border-top: 3px solid transparent; transition: border-top-color 0.2s, box-shadow 0.2s; }
+    .feature-card:hover { border-top-color: var(--azul); box-shadow: 0 8px 28px rgba(26,79,139,0.10); }
+    .feature-icon { width: 50px; height: 50px; background: rgba(26,79,139,0.08); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px; }
+    .feature-card h3 { font-family: var(--fonte-titulo); font-size: 20px; font-weight: 700; color: var(--azul-escuro); margin-bottom: 8px; }
+    .feature-card p { color: #777; font-size: 16px; line-height: 1.6; }
+    .cta-section { background: var(--azul-escuro); padding: 80px 24px; text-align: center; position: relative; overflow: hidden; }
+    .cta-section::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent, var(--verde), transparent); }
+    .cta-section h2 { font-family: var(--fonte-titulo); font-size: clamp(28px,3.5vw,44px); font-weight: 800; color: var(--branco); margin-bottom: 14px; }
+    .cta-section p { color: #6A8FAF; font-size: 17px; margin-bottom: 36px; max-width: 460px; margin-left: auto; margin-right: auto; }
+    @media (max-width: 768px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; } .features-grid { grid-template-columns: 1fr; } .hero-illustration { display: none; } }
+</style>
+
+<section class="hero">
+    <div class="hero-grid">
+        <div class="hero-text">
+            <div class="hero-badge">&#127959;&#65039; Gest&atilde;o de Obras &mdash; CREA</div>
+            <h1>Obras p&uacute;blicas<br>documentadas<br><em>com precis&atilde;o.</em></h1>
+            <p class="hero-desc">Gerencie obras do CREA de Adamantina de forma digital: registre etapas, controle materiais e gere relat&oacute;rios em PDF.</p>
+            <div class="hero-ctas">
+                <a href="{% url 'solicitar_cadastro' %}" class="cta-primary">Solicitar Cadastro</a>
+                <a href="{% url 'about' %}" class="cta-secondary">Saiba mais</a>
+            </div>
+        </div>
+        <div class="hero-illustration">
+            <div class="caderneta-mock">
+                <div class="caderneta-header">
+                    <div class="caderneta-icon">&#127963;</div>
+                    <div>
+                        <div class="caderneta-title">Reforma Sede &mdash; CREA</div>
+                        <div class="caderneta-sub">&#218;ltima edi&ccedil;&atilde;o: hoje</div>
+                    </div>
+                </div>
+                <div class="caderneta-row"><span class="label">Funda&ccedil;&atilde;o</span><span class="value ok">&#10004; Conclu&iacute;da</span></div>
+                <div class="caderneta-row"><span class="label">Alvenaria</span><span class="value pend">&#9203; Em andamento</span></div>
+                <div class="caderneta-row"><span class="label">Cobertura</span><span class="value" style="color:#2A4A6A">&mdash; Pendente</span></div>
+                <div class="caderneta-row"><span class="label">Instala&ccedil;&otilde;es</span><span class="value" style="color:#2A4A6A">&mdash; Pendente</span></div>
+                <div class="caderneta-footer">
+                    <div class="mock-btn verde">Editar</div>
+                    <div class="mock-btn ghost">Exportar PDF</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="section-header">
+        <div class="section-tag">Por que usar o sistema?</div>
+        <h2>Gest&atilde;o completa das obras do CREA</h2>
+        <p>Do in&iacute;cio ao acabamento, registre cada etapa com clareza e seguran&ccedil;a.</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card"><div class="feature-icon">&#128211;</div><h3>Cadernetas Digitais</h3><p>Crie cadernetas completas para cada obra, com campos personalizados, datas e respons&aacute;veis.</p></div>
+        <div class="feature-card"><div class="feature-icon">&#128196;</div><h3>Exporta&ccedil;&atilde;o em PDF</h3><p>Gere relat&oacute;rios profissionais com um clique para presta&ccedil;&atilde;o de contas ou arquivamento.</p></div>
+        <div class="feature-card"><div class="feature-icon">&#128272;</div><h3>Acesso Controlado</h3><p>Apenas servidores autorizados acessam o sistema. Cadastros s&atilde;o aprovados pelo administrador.</p></div>
+        <div class="feature-card"><div class="feature-icon">&#9999;&#65039;</div><h3>Edi&ccedil;&atilde;o Simples</h3><p>Interface intuitiva para atualizar o andamento da obra a qualquer momento, de onde estiver.</p></div>
+        <div class="feature-card"><div class="feature-icon">&#128241;</div><h3>Funciona no Celular</h3><p>Acesse as cadernetas diretamente do smartphone no campo de obra, sem instalar nada.</p></div>
+        <div class="feature-card"><div class="feature-icon">&#128193;</div><h3>Hist&oacute;rico Completo</h3><p>Todas as obras ficam salvas no sistema. Consulte registros antigos a qualquer tempo.</p></div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <h2>Precisa de acesso ao sistema?</h2>
+    <p>Solicite seu cadastro e aguarde a aprova&ccedil;&atilde;o do administrador.</p>
+    <a href="{% url 'solicitar_cadastro' %}" class="cta-primary" style="font-size:1.05rem;padding:15px 38px;">Solicitar Cadastro &rarr;</a>
+</section>
+{% endblock %}
