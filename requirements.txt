@@ -1,1 +1,6 @@
-django>=3.2.14
+# Dependências principais do ConectObra (Gerenciador de Obras)
+Django>=4.2.0,<5.2.0
+Pillow>=10.0.0
+
+# Suporte a fuso horário no Windows (necessário para zoneinfo do Django)
+tzdata>=2024.1
