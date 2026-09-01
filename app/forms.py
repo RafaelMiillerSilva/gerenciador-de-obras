@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import json
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
@@ -199,7 +199,7 @@ class RelatoForm(forms.ModelForm):
 
     class Meta:
         model = Relato
-        fields = ['data', 'opcoes_servicos', 'conformidade', 'observacoes', 'decisoes_tecnicas', 'status']
+        fields = ['data', 'opcoes_servicos', 'conformidade', 'imagem', 'observacoes', 'decisoes_tecnicas', 'status']
         widgets = {
             'data': forms.DateInput(attrs={
                 'class': 'form-control',
@@ -207,6 +207,10 @@ class RelatoForm(forms.ModelForm):
             }),
             'conformidade': forms.Select(attrs={
                 'class': 'form-control'
+            }),
+            'imagem': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
             }),
             'observacoes': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -235,17 +239,12 @@ class RelatoForm(forms.ModelForm):
 class TermoForm(forms.ModelForm):
     class Meta:
         model = Termo
-        fields = ['descricao', 'decisoes_tecnicas', 'status']
+        fields = ['declaracao_texto', 'status']
         widgets = {
-            'descricao': forms.Textarea(attrs={
+            'declaracao_texto': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 6,
-                'placeholder': 'Descricao da conclusao da obra...'
-            }),
-            'decisoes_tecnicas': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 6,
-                'placeholder': 'Decisoes tecnicas e consideracoes finais...'
+                'rows': 8,
+                'placeholder': 'Digite a declaracao de conclusao da obra...'
             }),
             'status': forms.Select(attrs={
                 'class': 'form-control'

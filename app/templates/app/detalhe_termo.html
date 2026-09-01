@@ -62,27 +62,18 @@
         <form method="post" novalidate>
             {% csrf_token %}
 
-            <!-- SECAO 1: DESCRICAO -->
+            <!-- SECAO 1: DECLARACAO DE CONCLUSAO -->
             <div class="form-section">
-                <div class="form-header">Descricao da Conclusao</div>
+                <div class="form-header">Declaracao de Conclusao</div>
                 <div class="form-content">
                     <div class="form-row full">
                         <div class="form-group">
-                            <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
-                            {{ form.descricao }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECAO 2: DECISOES TECNICAS -->
-            <div class="form-section">
-                <div class="form-header">Decisoes Tecnicas Finais</div>
-                <div class="form-content">
-                    <div class="form-row full">
-                        <div class="form-group">
-                            <label for="{{ form.decisoes_tecnicas.id_for_label }}">{{ form.decisoes_tecnicas.label }}</label>
-                            {{ form.decisoes_tecnicas }}
+                            <label for="{{ form.declaracao_texto.id_for_label }}">Texto da Declaracao <span style="color:#C0392B">*</span></label>
+                            {{ form.declaracao_texto }}
+                            <small style="color:#8AADD4; margin-top:6px;">Insira a declaracao formal de conclusao das atividades tecnicas da obra.</small>
+                            {% if form.declaracao_texto.errors %}
+                            <div style="color:#C0392B; font-size:12px; margin-top:6px;">{{ form.declaracao_texto.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

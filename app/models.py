@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -248,6 +248,7 @@ class Relato(models.Model):
     conformidade     = models.CharField('Conformidade', max_length=20, choices=CONFORMIDADE_CHOICES)
     observacoes      = models.TextField('Observacoes', blank=True)
     decisoes_tecnicas = models.TextField('Decisoes tecnicas', blank=True)
+    imagem           = models.ImageField('Foto / Imagem da visita', upload_to='relatos/fotos/', null=True, blank=True)
     status           = models.CharField('Status', max_length=20, choices=STATUS_DOCUMENTO, default='em_andamento')
     criado_em        = models.DateTimeField(auto_now_add=True)
     atualizado_em    = models.DateTimeField(auto_now=True)
@@ -270,9 +271,8 @@ class Relato(models.Model):
 
 class Termo(models.Model):
     recibo           = models.OneToOneField(Recibo, on_delete=models.CASCADE, related_name='termo')
-    descricao        = models.TextField('Descricao', blank=True)
+    declaracao_texto = models.TextField('Declaracao de conclusao', blank=True)
     decidido         = models.BooleanField('Decidido', default=False)
-    decisoes_tecnicas = models.TextField('Decisoes tecnicas', blank=True)
     status           = models.CharField('Status', max_length=20, choices=STATUS_DOCUMENTO, default='em_andamento')
     criado_em        = models.DateTimeField(auto_now_add=True)
     atualizado_em    = models.DateTimeField(auto_now=True)

@@ -1,6 +1,8 @@
-﻿from django.urls import path
+from django.urls import path
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView
+from django.conf import settings
+from django.conf.urls.static import static
 from app import views
 
 urlpatterns = [
@@ -42,3 +44,7 @@ urlpatterns = [
 
     path('painel/usuario/<int:pk>/editar/', views.editar_usuario_admin, name='editar_usuario_admin'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

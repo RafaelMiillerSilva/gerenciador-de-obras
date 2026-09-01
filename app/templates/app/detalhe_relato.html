@@ -64,7 +64,7 @@
 <section class="det-body">
     <div class="det-inner">
 
-        <form method="post" novalidate>
+        <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
 
             <!-- SECAO 1: DATA E CONFORMIDADE -->
@@ -84,7 +84,34 @@
                 </div>
             </div>
 
-            <!-- SECAO 2: SERVICOS -->
+            <!-- SECAO 2: FOTO / IMAGEM DA VISITA -->
+            <div class="form-section">
+                <div class="form-header">Registro Fotografico da Visita</div>
+                <div class="form-content">
+                    {% if relato.imagem %}
+                    <div style="margin-bottom:16px;">
+                        <label style="font-size:12px; font-weight:700; color:#4A5A6A; text-transform:uppercase; display:block; margin-bottom:8px;">Imagem Atual</label>
+                        <div style="display:inline-block; border:1px solid #D8E0EA; border-radius:8px; padding:6px; background:#F7F9FC;">
+                            <a href="{{ relato.imagem.url }}" target="_blank" title="Clique para abrir a foto original">
+                                <img src="{{ relato.imagem.url }}" alt="Foto da visita" style="max-width:280px; max-height:180px; border-radius:6px; object-fit:cover; display:block;">
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="{{ form.imagem.id_for_label }}">{% if relato.imagem %}Substituir Foto / Imagem{% else %}Foto / Imagem da Obra{% endif %}</label>
+                            {{ form.imagem }}
+                            <small style="color:#8AADD4; margin-top:6px;">Formatos aceitos: JPG, PNG, WEBP.</small>
+                            {% if form.imagem.errors %}
+                            <div style="color:#C0392B; font-size:12px; margin-top:6px;">{{ form.imagem.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECAO 3: SERVICOS -->
             <div class="form-section">
                 <div class="form-header">Servicos Executados</div>
                 <div class="form-content">
@@ -104,7 +131,7 @@
                 </div>
             </div>
 
-            <!-- SECAO 3: OBSERVACOES -->
+            <!-- SECAO 4: OBSERVACOES -->
             <div class="form-section">
                 <div class="form-header">Observacoes e Decisoes Tecnicas</div>
                 <div class="form-content">

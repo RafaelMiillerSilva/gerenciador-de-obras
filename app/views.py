@@ -1,4 +1,4 @@
-﻿import secrets
+import secrets
 import string
 import json
 from datetime import datetime
@@ -477,7 +477,7 @@ def criar_relato(request, pk):
         return redirect('detalhe_caderneta', pk=pk)
 
     if request.method == 'POST':
-        form = RelatoForm(request.POST)
+        form = RelatoForm(request.POST, request.FILES)
         if form.is_valid():
             relato = form.save(commit=False)
             relato.recibo = recibo
@@ -506,7 +506,7 @@ def detalhe_relato(request, pk):
     relato = get_object_or_404(Relato, pk=pk, recibo__caderneta__usuario=request.user)
 
     if request.method == 'POST':
-        form = RelatoForm(request.POST, instance=relato)
+        form = RelatoForm(request.POST, request.FILES, instance=relato)
         if form.is_valid():
             relato_obj = form.save(commit=False)
             relato_obj.status = 'em_andamento'
