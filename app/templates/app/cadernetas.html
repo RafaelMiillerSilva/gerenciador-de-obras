@@ -1,4 +1,4 @@
-﻿{% extends "app/layout.html" %}
+{% extends "app/layout.html" %}
 {% block content %}
 {% load static %}
 <style>
@@ -39,6 +39,7 @@
 
     .card-info { padding:14px 16px 18px; flex:1; display:flex; flex-direction:column; gap:6px; }
     .card-apelido { font-family:var(--fonte-titulo); font-size:1rem; font-weight:700; color:var(--azul-escuro); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .card-proprietario { font-size:13px; font-weight:600; color:#4E6178; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:5px; }
     .card-meta { font-size:13px; color:#AAA; }
 
     .card-nova { background:transparent; border:2px dashed #C8D5E8; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:210px; text-decoration:none; color:#8AADD4; font-family:var(--fonte-titulo); font-size:14px; font-weight:700; transition:border-color .2s, color .2s, background .2s; }
@@ -108,6 +109,7 @@
                 {% for c in cadernetas_andamento %}
                 <a href="{% url 'detalhe_caderneta' c.pk %}" class="card-obra"
                    data-apelido="{{ c.apelido|lower }}"
+                   data-proprietario="{{ c.proprietario_nome|default:''|lower }}"
                    data-ano="{{ c.ano }}"
                    data-status="andamento">
                     <div class="card-icone">
@@ -120,6 +122,9 @@
                     </div>
                     <div class="card-info">
                         <div class="card-apelido">{{ c.apelido }}</div>
+                        {% if c.proprietario_nome %}
+                        <div class="card-proprietario" title="Proprietário: {{ c.proprietario_nome }}">👤 {{ c.proprietario_nome }}</div>
+                        {% endif %}
                         <div class="card-meta">📅 {{ c.criado_em|date:"d/m/Y" }}</div>
                     </div>
                 </a>
@@ -139,6 +144,7 @@
                 {% for c in cadernetas_concluidas %}
                 <a href="{% url 'detalhe_caderneta' c.pk %}" class="card-obra"
                    data-apelido="{{ c.apelido|lower }}"
+                   data-proprietario="{{ c.proprietario_nome|default:''|lower }}"
                    data-ano="{{ c.ano }}"
                    data-status="concluida">
                     <div class="card-icone">
@@ -151,6 +157,9 @@
                     </div>
                     <div class="card-info">
                         <div class="card-apelido">{{ c.apelido }}</div>
+                        {% if c.proprietario_nome %}
+                        <div class="card-proprietario" title="Proprietário: {{ c.proprietario_nome }}">👤 {{ c.proprietario_nome }}</div>
+                        {% endif %}
                         <div class="card-meta">📅 {{ c.criado_em|date:"d/m/Y" }}</div>
                     </div>
                 </a>
@@ -201,7 +210,7 @@ function filtrar() {
     const status = document.getElementById('filtroStatus').value;
 
     document.querySelectorAll('.card-obra').forEach(card => {
-        const nomeOk   = card.dataset.apelido.includes(busca);
+        const nomeOk   = card.dataset.apelido.includes(busca) || (card.dataset.proprietario && card.dataset.proprietario.includes(busca));
         const anoOk    = !ano    || card.dataset.ano    === ano;
         const statusOk = !status || card.dataset.status === status;
         card.style.display = (nomeOk && anoOk && statusOk) ? '' : 'none';

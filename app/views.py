@@ -19,7 +19,7 @@ from app.forms import (
 )
 from app.models import (
     PerfilUsuario, SolicitacaoCadastro, Caderneta,
-    Recibo, Relato, Termo, Proprietario
+    Recibo, Relato, FotoRelato, Termo, Proprietario
 )
 
 
@@ -307,6 +307,7 @@ def cadernetas(request):
     cadernetas_list = (
         Caderneta.objects
         .filter(usuario=request.user)
+        .select_related('recibo__proprietario')
         .order_by('-criado_em')
     )
 
@@ -483,10 +484,14 @@ def criar_relato(request, pk):
             relato.recibo = recibo
             relato.save()
 
+            # Salvar multiplas fotos anexadas
+            for f in request.FILES.getlist('fotos'):
+                FotoRelato.objects.create(relato=relato, imagem=f)
+
             messages.success(request, 'Relato criado com sucesso!')
             return redirect('detalhe_caderneta', pk=pk)
         else:
-            for field, errors in form.errors.items():
+            for field, errors in (form.errors or {}).items():
                 messages.error(request, f'{field}: {errors[0]}')
     else:
         form = RelatoForm()
@@ -512,10 +517,14 @@ def detalhe_relato(request, pk):
             relato_obj.status = 'em_andamento'
             relato_obj.save()
 
+            # Salvar multiplas fotos anexadas
+            for f in request.FILES.getlist('fotos'):
+                FotoRelato.objects.create(relato=relato_obj, imagem=f)
+
             messages.success(request, 'Relato atualizado com sucesso! Status resetado para "Em andamento".')
-            return redirect('detalhe_caderneta', pk=relato.recibo.caderneta.pk)
+            return redirect('detalhe_relato', pk=relato.pk)
         else:
-            for field, errors in form.errors.items():
+            for field, errors in (form.errors or {}).items():
                 messages.error(request, f'{field}: {errors[0]}')
     else:
         form = RelatoForm(instance=relato)
@@ -525,8 +534,20 @@ def detalhe_relato(request, pk):
         'year': datetime.now().year,
         'relato': relato,
         'relato_servicos': relato.get_servicos_lista(),
+        'fotos': relato.fotos.all(),
         'form': form,
     })
+
+
+@require_POST
+@login_required
+def remover_foto_relato(request, pk):
+    """Remove uma foto específica de um relato."""
+    foto = get_object_or_404(FotoRelato, pk=pk, relato__recibo__caderneta__usuario=request.user)
+    relato_pk = foto.relato.pk
+    foto.delete()
+    messages.success(request, 'Foto removida com sucesso!')
+    return redirect('detalhe_relato', pk=relato_pk)
 
 
 @login_required
@@ -554,7 +575,7 @@ def criar_termo(request, pk):
             messages.success(request, 'Termo criado com sucesso!')
             return redirect('detalhe_caderneta', pk=pk)
         else:
-            for field, errors in form.errors.items():
+            for field, errors in (form.errors or {}).items():
                 messages.error(request, f'{field}: {errors[0]}')
     else:
         form = TermoForm()
@@ -583,7 +604,7 @@ def detalhe_termo(request, pk):
             messages.success(request, 'Termo atualizado com sucesso! Status resetado para "Em andamento".')
             return redirect('detalhe_caderneta', pk=termo.recibo.caderneta.pk)
         else:
-            for field, errors in form.errors.items():
+            for field, errors in (form.errors or {}).items():
                 messages.error(request, f'{field}: {errors[0]}')
     else:
         form = TermoForm(instance=termo)

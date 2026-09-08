@@ -20,22 +20,18 @@ ESTADOS_BR = [
 
 
 class BootstrapAuthenticationForm(AuthenticationForm):
-    # Sobrescrevemos o campo username para exibir "E-mail ou Número do CREA"
-    username = forms.CharField(
-        label="E-mail ou Número do CREA",
-        widget=forms.TextInput(attrs={
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = "E-mail ou Número do CREA"
+        self.fields['username'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Seu e-mail ou número do CREA',
             'autofocus': True
         })
-    )
-    password = forms.CharField(
-        label="Senha",
-        widget=forms.PasswordInput(attrs={
+        self.fields['password'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': 'Sua senha',
+            'placeholder': 'Sua senha'
         })
-    )
 
 
 class SolicitacaoCadastroForm(forms.ModelForm):
@@ -121,8 +117,8 @@ class ReciboForm(forms.ModelForm):
         fields = [
             'empresa', 'local_obra',
             'area_construir', 'area_ampliar', 'area_reformar', 'area_regularizar',
-            'tipo_edificacao', 'tipo_outros',
-            'atividade_tecnica', 'atividade_outros',
+            'tipo_edificacao',
+            'atividade_tecnica',
             'data', 'valor_obra', 'status'
         ]
         widgets = {
@@ -159,18 +155,8 @@ class ReciboForm(forms.ModelForm):
             'tipo_edificacao': forms.Select(attrs={
                 'class': 'form-control'
             }),
-            'tipo_outros': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Se selecionou "Outros"',
-                'maxlength': '100'
-            }),
             'atividade_tecnica': forms.Select(attrs={
                 'class': 'form-control'
-            }),
-            'atividade_outros': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Se selecionou "Outros"',
-                'maxlength': '100'
             }),
             'data': forms.DateInput(attrs={
                 'class': 'form-control',
@@ -199,18 +185,14 @@ class RelatoForm(forms.ModelForm):
 
     class Meta:
         model = Relato
-        fields = ['data', 'opcoes_servicos', 'conformidade', 'imagem', 'observacoes', 'decisoes_tecnicas', 'status']
+        fields = ['data', 'opcoes_servicos', 'posicao_obra', 'observacoes', 'decisoes_tecnicas', 'status']
         widgets = {
             'data': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
             }),
-            'conformidade': forms.Select(attrs={
+            'posicao_obra': forms.Select(attrs={
                 'class': 'form-control'
-            }),
-            'imagem': forms.FileInput(attrs={
-                'class': 'form-control',
-                'accept': 'image/*'
             }),
             'observacoes': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -243,10 +225,12 @@ class TermoForm(forms.ModelForm):
         widgets = {
             'declaracao_texto': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 8,
-                'placeholder': 'Digite a declaracao de conclusao da obra...'
+                'rows': 5,
+                'placeholder': 'os serviços contratados foram executados em conformidade com o projeto e as normas técnicas vigentes, estando a obra em condições de habitabilidade e uso...',
+                'style': 'width:100%;border:none;border-bottom:1px dashed #AAB;background:transparent;outline:none;font-family:inherit;font-size:14px;line-height:1.8;resize:vertical;min-height:80px;padding:8px 4px;margin:4px 0;color:#333;'
             }),
             'status': forms.Select(attrs={
                 'class': 'form-control'
             }),
         }
+

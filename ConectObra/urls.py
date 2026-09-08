@@ -22,6 +22,7 @@ urlpatterns = [
     # Relatos
     path('cadernetas/<int:pk>/relato/criar/', views.criar_relato, name='criar_relato'),
     path('relatos/<int:pk>/', views.detalhe_relato, name='detalhe_relato'),
+    path('relatos/foto/<int:pk>/remover/', views.remover_foto_relato, name='remover_foto_relato'),
 
     # Termos
     path('cadernetas/<int:pk>/termo/criar/', views.criar_termo, name='criar_termo'),

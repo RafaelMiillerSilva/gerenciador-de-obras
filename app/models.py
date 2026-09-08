@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pyright: reportMissingTypeStubs=false
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -26,27 +27,26 @@ STATUS_DOCUMENTO = [
 ]
 
 TIPO_EDIFICACAO = [
-    ('residencial_unifamiliar',   'Residencial Unifamiliar'),
-    ('residencial_multifamiliar', 'Residencial Multifamiliar'),
-    ('comercial',                 'Comercial'),
-    ('industrial',                'Industrial'),
-    ('publico',                   'Publico'),
-    ('outros',                    'Outros'),
+    ('residencial', 'Residencial'),
+    ('industrial',  'Industrial'),
+    ('comercial',   'Comercial'),
 ]
 
 ATIVIDADE_TECNICA = [
-    ('construcao',    'Construcao'),
-    ('ampliacao',     'Ampliacao'),
-    ('reforma',       'Reforma'),
-    ('regularizacao', 'Regularizacao'),
-    ('outros',        'Outros'),
+    ('direcao_tecnica', 'Direção técnica'),
+    ('execucao',        'Execução'),
+    ('fiscalizacao',    'Fiscalização'),
+    ('projeto',         'Projeto'),
 ]
 
-CONFORMIDADE_CHOICES = [
-    ('conforme',     'Conforme'),
-    ('nao_conforme', 'Nao conforme'),
-    ('parcial',      'Parcialmente conforme'),
+POSICAO_OBRA_CHOICES = [
+    ('de_acordo',    'De acordo com o projeto'),
+    ('em_desacordo', 'Em desacordo com o projeto'),
+    ('em_andamento', 'Em andamento'),
+    ('paralisada',   'Paralisada'),
 ]
+
+CONFORMIDADE_CHOICES = POSICAO_OBRA_CHOICES
 
 TIPO_SIGNATARIO = [
     ('engenheiro',   'Engenheiro'),
@@ -156,7 +156,7 @@ class Caderneta(models.Model):
         ordering            = ['-criado_em']
 
     def __str__(self):
-        return self.apelido
+        return str(self.apelido)
 
     @property
     def concluida(self):
@@ -175,7 +175,14 @@ class Caderneta(models.Model):
 
     @property
     def ano(self):
-        return self.criado_em.year
+        return getattr(self.criado_em, 'year', None)
+
+    @property
+    def proprietario_nome(self):
+        recibo = getattr(self, 'recibo', None)
+        if recibo and getattr(recibo, 'proprietario', None):
+            return str(recibo.proprietario.nome)
+        return None
 
 
 class Proprietario(models.Model):
@@ -188,7 +195,7 @@ class Proprietario(models.Model):
         verbose_name_plural = 'Proprietarios'
 
     def __str__(self):
-        return self.nome
+        return str(self.nome)
 
 
 class Recibo(models.Model):
@@ -229,15 +236,15 @@ class Recibo(models.Model):
 
     @property
     def area_total(self):
-        total = 0
+        total = 0.0
         if self.area_construir:
-            total += float(self.area_construir)
+            total += float(str(self.area_construir))
         if self.area_ampliar:
-            total += float(self.area_ampliar)
+            total += float(str(self.area_ampliar))
         if self.area_reformar:
-            total += float(self.area_reformar)
+            total += float(str(self.area_reformar))
         if self.area_regularizar:
-            total += float(self.area_regularizar)
+            total += float(str(self.area_regularizar))
         return total
 
 
@@ -245,7 +252,7 @@ class Relato(models.Model):
     recibo           = models.ForeignKey(Recibo, on_delete=models.CASCADE, related_name='relatos')
     data             = models.DateField('Data da visita')
     opcoes_servicos  = models.TextField('Servicos executados', help_text='Marque os servicos realizados')
-    conformidade     = models.CharField('Conformidade', max_length=20, choices=CONFORMIDADE_CHOICES)
+    posicao_obra     = models.CharField('Posição da obra', max_length=30, choices=POSICAO_OBRA_CHOICES, default='de_acordo')
     observacoes      = models.TextField('Observacoes', blank=True)
     decisoes_tecnicas = models.TextField('Decisoes tecnicas', blank=True)
     imagem           = models.ImageField('Foto / Imagem da visita', upload_to='relatos/fotos/', null=True, blank=True)
@@ -261,12 +268,30 @@ class Relato(models.Model):
     def __str__(self):
         return f'Relato - {self.data}'
 
+    @property
+    def conformidade(self):
+        return self.get_posicao_obra_display()
+
     def get_servicos_lista(self):
         """Retorna lista de servicos selecionados."""
         try:
             return json.loads(self.opcoes_servicos) if isinstance(self.opcoes_servicos, str) else self.opcoes_servicos
         except:
             return []
+
+
+class FotoRelato(models.Model):
+    relato    = models.ForeignKey(Relato, on_delete=models.CASCADE, related_name='fotos')
+    imagem    = models.ImageField('Foto da visita', upload_to='relatos/fotos/')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name        = 'Foto do Relato'
+        verbose_name_plural = 'Fotos do Relato'
+        ordering            = ['criado_em']
+
+    def __str__(self):
+        return f'Foto {self.pk} de Relato {self.relato.pk}'
 
 
 class Termo(models.Model):
