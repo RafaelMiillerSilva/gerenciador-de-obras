@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} — CREA Adamantina</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --azul-escuro: #0E2238;
+            --azul-primario: #1E3F6A;
+            --azul-claro: #2A548A;
+            --verde: #2E7D32;
+            --verde-claro: #4CAF50;
+            --cinza-bg: #F0F4F8;
+            --cinza-card: #FFFFFF;
+            --texto-principal: #1A2838;
+            --texto-secundario: #66788A;
+            --borda: #D8E0EA;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--cinza-bg);
+            color: var(--texto-principal);
+            line-height: 1.5;
+            padding-bottom: 40px;
+        }
+
+        /* Topo Institucional Mobile */
+        .topo-institucional {
+            background: var(--azul-escuro);
+            color: #fff;
+            padding: 20px 16px;
+            text-align: center;
+            border-bottom: 4px solid var(--verde-claro);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+        .topo-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #8AADD4;
+            text-transform: uppercase;
+        }
+        .topo-titulo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 19px;
+            font-weight: 800;
+            color: #fff;
+            margin-top: 4px;
+        }
+        .topo-sub {
+            font-size: 12px;
+            color: #B4CCE8;
+            margin-top: 2px;
+        }
+
+        .container {
+            max-width: 620px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* Mensagens de Feedback */
+        .alert {
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .alert-success { background: #E8F5E9; border: 1px solid #A5D6A7; color: #1B5E20; }
+        .alert-error { background: #FFEBEE; border: 1px solid #EF9A9A; color: #B71C1C; }
+        .alert-info { background: #E3F2FD; border: 1px solid #90CAF9; color: #0D47A1; }
+
+        /* Card do Documento */
+        .card {
+            background: var(--cinza-card);
+            border-radius: 12px;
+            border: 1px solid var(--borda);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #F8FAFD;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--borda);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--azul-primario);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .card-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .card-body {
+            padding: 18px;
+        }
+
+        /* Linhas de informações */
+        .info-row {
+            margin-bottom: 12px;
+        }
+        .info-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--texto-secundario);
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            font-size: 14.5px;
+            font-weight: 600;
+            color: var(--texto-principal);
+            margin-top: 2px;
+        }
+
+        /* Lista de Serviços Executados */
+        .servicos-lista {
+            list-style: none;
+            margin-top: 8px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+        .servicos-lista li {
+            font-size: 13.5px;
+            color: #2C3E50;
+            background: #F4F7FB;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Galeria de Fotos Mobile */
+        .galeria-mobile {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .foto-item {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #D8E0EA;
+            height: 130px;
+            background: #000;
+        }
+        .foto-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Seção da Assinatura Cursiva */
+        .area-assinatura {
+            background: #FAFBFD;
+            border: 2px dashed #B8D0EC;
+            border-radius: 10px;
+            padding: 20px 16px;
+            text-align: center;
+            margin: 16px 0;
+        }
+        .nome-cursivo {
+            font-family: 'Caveat', cursive;
+            font-size: 34px;
+            font-weight: 700;
+            color: #1E3F6A;
+            line-height: 1.2;
+            padding-bottom: 6px;
+            display: inline-block;
+            border-bottom: 2px solid #2ECC71;
+            min-width: 200px;
+        }
+        .nome-cursivo-hint {
+            font-size: 11.5px;
+            color: #7A8E9F;
+            margin-top: 8px;
+        }
+
+        /* Formulário de Confirmação */
+        .campo-grupo {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .campo-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--texto-principal);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .campo-input {
+            width: 100%;
+            padding: 13px 16px;
+            font-size: 16px;
+            font-family: inherit;
+            border: 1.5px solid #CBD5E1;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color .2s;
+            background: #fff;
+        }
+        .campo-input:focus {
+            border-color: var(--azul-primario);
+            box-shadow: 0 0 0 3px rgba(30,63,106,0.1);
+        }
+
+        .check-termo {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin: 18px 0;
+            text-align: left;
+            font-size: 13px;
+            color: #4A5A6A;
+            cursor: pointer;
+        }
+        .check-termo input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--verde);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        /* Botão Grande de Ação */
+        .btn-assinar {
+            width: 100%;
+            background: var(--verde);
+            color: #fff;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 14px rgba(46,125,50,0.3);
+            transition: background .2s, transform .1s;
+        }
+        .btn-assinar:hover {
+            background: #276B2B;
+        }
+        .btn-assinar:active {
+            transform: scale(0.98);
+        }
+
+        /* Selo de Concluído */
+        .comprovante-sucesso {
+            text-align: center;
+            padding: 24px 16px;
+        }
+        .icone-sucesso {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .hash-code {
+            font-family: monospace;
+            background: #E8EEF5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            word-break: break-all;
+            margin-top: 6px;
+            display: inline-block;
+            color: var(--azul-escuro);
+        }
+
+        .rodape-seguranca {
+            text-align: center;
+            font-size: 11.5px;
+            color: #8C9BAA;
+            margin-top: 24px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO INSTITUCIONAL -->
+    <header class="topo-institucional">
+        <div class="topo-logo">CREA Adamantina &bull; Sistema ConectObra</div>
+        <div class="topo-titulo">Assinatura Eletrônica Segura</div>
+        <div class="topo-sub">Documento Oficial com Validade Jurídica (Medida Provisória 2.200-2/2001)</div>
+    </header>
+
+    <main class="container">
+
+        <!-- MENSAGENS -->
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="alert {% if msg.tags == 'success' %}alert-success{% elif msg.tags == 'error' %}alert-error{% else %}alert-info{% endif %}">
+                <span>{% if msg.tags == 'success' %}&#9989;{% elif msg.tags == 'error' %}&#9888;&#65039;{% else %}&#8505;&#65039;{% endif %}</span>
+                <div>{{ msg }}</div>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- CARD 1: DADOS DA OBRA & PROFISSIONAL -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Identificação da Obra</h2>
+                <span class="card-badge">&#127959;&#65039; Registro Oficial</span>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <div class="info-label">Obra / Empreendimento</div>
+                    <div class="info-value">{{ caderneta.apelido }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Endereço da Obra</div>
+                    <div class="info-value">{{ caderneta.recibo.local_obra|default:"Adamantina / SP" }}</div>
+                </div>
+                <div class="info-row" style="margin-bottom:0;">
+                    <div class="info-label">Responsável Técnico (Engenheiro)</div>
+                    <div class="info-value">
+                        {{ engenheiro.first_name }} {{ engenheiro.last_name|default:engenheiro.username }}
+                        <span style="font-size:12px; color:#5A6A7A; font-weight:normal;">(CREA: {{ engenheiro.perfil.numero_crea|default:"Ativo" }})</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CARD 2: CONTEÚDO DO DOCUMENTO -->
+        <section class="card">
+            <div class="card-header">
+                <h2>{{ nome_doc }}</h2>
+                <span class="card-badge">&#128196; Peça Técnica</span>
+            </div>
+            <div class="card-body">
+
+                {% if assinatura.tipo_documento == 'relato' %}
+                    <div class="info-row">
+                        <div class="info-label">Data da Visita Técnica</div>
+                        <div class="info-value">{{ documento.data|date:"d/m/Y" }} &bull; Tempo: {{ documento.tempo }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Etapa / Posição da Obra</div>
+                        <div class="info-value">{{ documento.get_posicao_obra_display }}</div>
+                    </div>
+
+                    {% if servicos %}
+                    <div class="info-row">
+                        <div class="info-label">Serviços Executados no Período</div>
+                        <ul class="servicos-lista">
+                            {% for s in servicos %}
+                            <li>&#10003; {{ s }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {% if documento.observacoes %}
+                    <div class="info-row">
+                        <div class="info-label">Observações e Orientações Técnicas</div>
+                        <div style="background:#F7F9FD; padding:12px; border-radius:6px; font-size:13.5px; color:#333; margin-top:4px; line-height:1.5;">
+                            {{ documento.observacoes|linebreaksbr }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if fotos %}
+                    <div class="info-row" style="margin-bottom:0;">
+                        <div class="info-label">Registro Fotográfico da Visita ({{ fotos|length }})</div>
+                        <div class="galeria-mobile">
+                            {% for foto in fotos %}
+                            <div class="foto-item">
+                                <a href="{{ foto.imagem.url }}" target="_blank">
+                                    <img src="{{ foto.imagem.url }}" alt="Foto da Visita">
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                {% elif assinatura.tipo_documento == 'termo' %}
+                    <div class="info-row">
+                        <div class="info-label">Declaração Técnica de Conclusão</div>
+                        <div style="background:#F7F9FD; padding:14px; border-radius:6px; font-size:14px; color:#333; line-height:1.7; margin-top:6px;">
+                            <p style="font-style:italic; color:#1A4F8B; margin-bottom:8px;">
+                                "Nós, abaixo assinados, proprietário e profissional responsável pela execução da obra acima apontada, declaramos que:"
+                            </p>
+                            <p><strong>{{ documento.declaracao_texto|linebreaksbr }}</strong></p>
+                            <p style="font-size:12px; color:#666; margin-top:12px;">
+                                Temos ainda conhecimento na íntegra das sanções prescritas nas Legislações Federal, Estadual e Municipal vigentes.
+                            </p>
+                        </div>
+                    </div>
+                {% endif %}
+
+            </div>
+        </section>
+
+        <!-- CARD 3: ASSINATURA ELETRÔNICA DO PROPRIETÁRIO -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Assinatura do Proprietário</h2>
+                <span class="card-badge">&#128274; Autenticação Segura</span>
+            </div>
+            <div class="card-body">
+
+                {% if assinatura.status == 'concluido' %}
+                    <!-- JÁ ASSINADO -->
+                    <div class="comprovante-sucesso">
+                        <div class="icone-sucesso">&#9989;</div>
+                        <h3 style="font-family:'Outfit', sans-serif; font-size:18px; color:#2E7D32; margin-bottom:6px;">Documento Assinado com Sucesso!</h3>
+                        <p style="font-size:13.5px; color:#555;">
+                            Sua assinatura digital foi chancelada e vinculada à caderneta oficial no CREA.
+                        </p>
+
+                        <div class="area-assinatura" style="margin:16px 0; background:#F2FAF4; border-color:#A3D9B1;">
+                            <div class="nome-cursivo">{{ assinatura.nome_signatario }}</div>
+                            <div class="nome-cursivo-hint">Assinatura digital lavrada em {{ assinatura.assinado_em|date:"d/m/Y H:i:s" }}</div>
+                        </div>
+
+                        <div style="font-size:12px; color:#666; text-align:left; background:#FAFBFD; padding:12px; border-radius:6px; border:1px solid #E0E6F0;">
+                            <div><strong>Signatário:</strong> {{ assinatura.nome_signatario }}</div>
+                            <div><strong>CPF:</strong> {{ assinatura.cpf_signatario }}</div>
+                            <div><strong>IP do Dispositivo:</strong> {{ assinatura.ip_origem|default:"127.0.0.1" }}</div>
+                            <div style="margin-top:6px;"><strong>Código de Autenticidade (SHA-256):</strong><br>
+                                <span class="hash-code">{{ assinatura.hash_documento }}</span>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:16px;">
+                            <a href="{% url 'validar_documento_publico' assinatura.token %}" target="_blank" style="display:inline-block; font-size:13px; font-weight:700; color:var(--azul-primario); text-decoration:none; padding:8px 16px; border:1px solid var(--azul-primario); border-radius:6px;">
+                                &#128269; Ver Certidão de Autenticidade Pública
+                            </a>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <!-- FORMULÁRIO DE ASSINATURA -->
+                    <form method="post" action="{% url 'confirmar_assinatura_publico' assinatura.token %}">
+                        {% csrf_token %}
+
+                        <p style="font-size:13.5px; color:#555; margin-bottom:14px;">
+                            Olá, <strong>{{ proprietario.nome }}</strong>! Verifique os dados acima. Para formalizar sua concordância e assinar eletronicamente este documento, digite seu CPF e confirme o termo abaixo:
+                        </p>
+
+                        <!-- Prévia Visual da Assinatura Cursiva -->
+                        <div class="area-assinatura">
+                            <span class="info-label" style="display:block; margin-bottom:4px;">Representação Gráfica da Sua Assinatura:</span>
+                            <div class="nome-cursivo">{{ proprietario.nome }}</div>
+                            <div class="nome-cursivo-hint">Assinatura eletrônica chancelada com carimbo de tempo e IP</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label" for="cpf">Confirme seu CPF para validação <span style="color:#C62828;">*</span></label>
+                            <input type="text" id="cpf" name="cpf" class="campo-input" placeholder="000.000.000-00" maxlength="18" inputmode="numeric" required>
+                            <span style="font-size:11px; color:#888;">Digite os 11 dígitos do CPF do titular contratante da obra.</span>
+                        </div>
+
+                        <label class="check-termo">
+                            <input type="checkbox" name="concordo" value="1" required>
+                            <span>
+                                <strong>Declaro que li e concordo</strong> com as informações e serviços técnicos descritos neste documento para todos os fins legais e jurídicos.
+                            </span>
+                        </label>
+
+                        <button type="submit" class="btn-assinar">
+                            &#9989; Assinar Digitalmente pelo Celular
+                        </button>
+                    </form>
+                {% endif %}
+
+            </div>
+        </section>
+
+        <!-- RODAPÉ DE SEGURANÇA -->
+        <footer class="rodape-seguranca">
+            <div>&#128274; Transmissão Criptografada SSL/TLS &bull; CREA Adamantina / SP</div>
+            <div>Esta assinatura eletrônica cumpre integralmente os requisitos da Lei Federal nº 14.063/2020 e da MP 2.200-2/2001.</div>
+        </footer>
+
+    </main>
+
+    <!-- Máscara de CPF amigável -->
+    <script>
+        const inputCpf = document.getElementById('cpf');
+        if (inputCpf) {
+            inputCpf.addEventListener('input', function(e) {
+                let v = e.target.value.replace(/\D/g, '');
+                if (v.length <= 11) {
+                    v = v.replace(/(\d{3})(\d)/, '$1.$2');
+                    v = v.replace(/(\d{3})(\d)/, '$1.$2');
+                    v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                } else {
+                    v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+                    v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                    v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                    v = v.replace(/(\d{4})(\d)/, '$1-$2');
+                }
+                e.target.value = v;
+            });
+        }
+    </script>
+</body>
+</html>

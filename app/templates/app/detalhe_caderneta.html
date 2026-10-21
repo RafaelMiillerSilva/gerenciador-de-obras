@@ -8,14 +8,14 @@
     .doc-voltar-bar a:hover { color: #fff; text-decoration: none; }
 
     .doc-page-bg { background: var(--cinza-claro); padding: 0 24px 64px; }
-    .doc-page-wrap { max-width: 820px; margin: 0 auto; }
+    .doc-page-wrap { max-width: 860px; margin: 0 auto; }
 
     /* Folha de papel oficial */
     .documento {
         background: #fff;
         border: 1px solid #C8D0DC;
-        border-radius: 3px;
-        box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.03);
+        border-radius: 4px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         margin-top: -20px;
         position: relative;
         overflow: hidden;
@@ -24,7 +24,7 @@
     /* Cabeçalho institucional */
     .doc-cabecalho {
         background: var(--azul-escuro);
-        padding: 28px 40px 22px;
+        padding: 30px 40px 24px;
         text-align: center;
         border-bottom: 4px solid var(--verde);
         position: relative;
@@ -40,16 +40,16 @@
     }
     .doc-cabecalho-titulo {
         font-family: var(--fonte-titulo);
-        font-size: 1.4rem;
+        font-size: 1.45rem;
         font-weight: 800;
         color: #fff;
         letter-spacing: 1.5px;
         text-transform: uppercase;
     }
     .doc-cabecalho-sub {
-        font-size: 12px;
-        color: #6A92BE;
-        margin-top: 4px;
+        font-size: 12.5px;
+        color: #8AADD4;
+        margin-top: 5px;
     }
 
     /* Corpo do documento */
@@ -71,7 +71,7 @@
         color: var(--azul-escuro);
         background: #F0F4FA;
         border-bottom: 1px solid #D8E0EA;
-        padding: 9px 18px;
+        padding: 10px 18px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -115,11 +115,12 @@
         text-decoration: none;
         color: inherit;
         transition: background 0.15s ease;
+        gap: 12px;
     }
     .peca-doc:last-child { border-bottom: none; }
     .peca-doc:hover { background: #F6F9FD; text-decoration: none; }
 
-    .peca-info { display: flex; align-items: center; gap: 14px; }
+    .peca-info { display: flex; align-items: center; gap: 14px; flex: 1; }
     .peca-icone {
         width: 38px;
         height: 38px;
@@ -134,6 +135,7 @@
     .peca-icone.andamento { background: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; }
     .peca-icone.pronto    { background: #E3F2FD; color: #1565C0; border: 1px solid #BBDEFB; }
     .peca-icone.concluido { background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+    .peca-icone.recusado  { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
 
     .peca-nome { font-size: 14px; font-weight: 700; color: var(--azul-escuro); }
     .peca-detalhe { font-size: 12px; color: #66788A; margin-top: 2px; }
@@ -150,6 +152,25 @@
     .badge-and { background: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; }
     .badge-pron { background: #E3F2FD; color: #1565C0; border: 1px solid #BBDEFB; }
     .badge-conc { background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+    .badge-rec  { background: #FFEBEE; color: #C62828; border: 1px solid #EF9A9A; }
+
+    .btn-whatsapp {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #25D366;
+        color: #fff !important;
+        font-size: 11.5px;
+        font-weight: 700;
+        padding: 7px 14px;
+        border-radius: 4px;
+        text-decoration: none !important;
+        transition: background .2s;
+        white-space: nowrap;
+    }
+    .btn-whatsapp:hover {
+        background: #1EBE5D;
+    }
 
     .btn-emitir {
         display: inline-flex;
@@ -231,26 +252,40 @@
     }
 
     @media print {
-        .doc-voltar-bar, .btn-emitir-outline { display: none !important; }
+        .doc-voltar-bar, .btn-emitir-outline, .btn-whatsapp { display: none !important; }
         .documento { border: none; box-shadow: none; margin-top: 0; }
     }
 </style>
 
 <div class="doc-voltar-bar">
-    <div class="doc-page-wrap">
-        <a href="{% url 'cadernetas' %}">← Voltar para Biblioteca de Cadernetas</a>
+    <div class="doc-page-wrap" style="display:flex; justify-content:space-between; align-items:center;">
+        <a href="{% url 'cadernetas' %}">← Voltar para Minhas Cadernetas</a>
+        {% if is_gestor %}
+        <a href="{% url 'painel_admin' %}" style="color:#6EC972; font-weight:700;">Painel de Homologações CREA →</a>
+        {% endif %}
     </div>
 </div>
 
-<div class="doc-page-bg">
+<div class="doc-page-bg" style="padding-top:40px;">
     <div class="doc-page-wrap">
+
+        {% if messages %}
+        <div style="margin-bottom:20px;">
+            {% for msg in messages %}
+            <div class="django-msg {{ msg.tags }}" style="padding:12px 16px; border-radius:4px; font-size:14px; margin-bottom:10px; background:#fff; border-left:4px solid #1E3F6A; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                {{ msg }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="documento">
 
             <!-- Cabeçalho Oficial -->
             <div class="doc-cabecalho">
                 <div class="doc-cabecalho-logo">CREA — CONSELHO REGIONAL DE ENGENHARIA E AGRONOMIA</div>
                 <div class="doc-cabecalho-titulo">LIVRO DE ORDEM E REGISTRO TÉCNICO DE OBRA</div>
-                <div class="doc-cabecalho-sub">Caderneta Oficial de Acompanhamento • Município de Adamantina / SP</div>
+                <div class="doc-cabecalho-sub">Caderneta Oficial de Acompanhamento &bull; Município de Adamantina / SP</div>
             </div>
 
             <div class="doc-corpo">
@@ -271,6 +306,9 @@
                             <div class="doc-valor">
                                 {% if recibo and recibo.proprietario %}
                                     {{ recibo.proprietario.nome }}
+                                    {% if recibo.proprietario.celular %}
+                                    <span style="color:#666; font-size:12px; font-weight:normal;"> &bull; {{ recibo.proprietario.celular }}</span>
+                                    {% endif %}
                                 {% else %}
                                     <span style="color:#9AA8B6; font-weight:400;">Pendente de cadastro no recibo</span>
                                 {% endif %}
@@ -302,7 +340,7 @@
                 <!-- SEÇÃO 1: RECIBO DE ATIVIDADE TÉCNICA -->
                 <div class="doc-secao">
                     <div class="doc-secao-titulo">
-                        <span>1. Recibo de Registro & Atividade Técnica</span>
+                        <span>1. Recibo de Responsabilidade Técnica (Engenheiro ⟷ CREA)</span>
                         {% if recibo %}
                         <a href="{% url 'detalhe_recibo' recibo.pk %}" style="color:var(--azul); font-size:11px; text-decoration:none; font-weight:700;">
                             Abrir Documento →
@@ -312,19 +350,27 @@
                     {% if recibo %}
                     <a href="{% url 'detalhe_recibo' recibo.pk %}" class="peca-doc">
                         <div class="peca-info">
-                            <div class="peca-icone {% if recibo.status == 'concluido' %}concluido{% elif recibo.status == 'pronto_assinar' %}pronto{% else %}andamento{% endif %}">
-                                {% if recibo.status == 'concluido' %}✓{% elif recibo.status == 'pronto_assinar' %}✎{% else %}⋯{% endif %}
+                            <div class="peca-icone {% if recibo.status == 'concluido' %}concluido{% elif recibo.status == 'aguardando_gestor' %}pronto{% elif recibo.status == 'recusado' %}recusado{% else %}andamento{% endif %}">
+                                {% if recibo.status == 'concluido' %}✓{% elif recibo.status == 'aguardando_gestor' %}🔒{% elif recibo.status == 'recusado' %}⚠️{% else %}⋯{% endif %}
                             </div>
                             <div>
-                                <div class="peca-nome">Recibo da Obra — {{ recibo.local_obra }}</div>
+                                <div class="peca-nome">Recibo da Obra — {{ recibo.local_obra|default:caderneta.apelido }}</div>
                                 <div class="peca-detalhe">
-                                    {{ recibo.get_tipo_obra_display }} • Atividade: {{ recibo.get_atividade_tecnica_display }} • Empresa: {{ recibo.empresa|default:"Não informada" }}
+                                    {{ recibo.get_tipo_obra_display }} &bull; Atividade: {{ recibo.get_atividade_tecnica_display }} &bull; Empresa: {{ recibo.empresa|default:"Não informada" }}
                                 </div>
                             </div>
                         </div>
-                        <span class="peca-badge {% if recibo.status == 'concluido' %}badge-conc{% elif recibo.status == 'pronto_assinar' %}badge-pron{% else %}badge-and{% endif %}">
-                            {{ recibo.get_status_display }}
-                        </span>
+                        <div>
+                            {% if recibo.status == 'concluido' %}
+                            <span class="peca-badge badge-conc">&#9989; Homologado pelo CREA</span>
+                            {% elif recibo.status == 'aguardando_gestor' %}
+                            <span class="peca-badge badge-pron">&#9203; Aguardando Gestor CREA</span>
+                            {% elif recibo.status == 'recusado' %}
+                            <span class="peca-badge badge-rec">&#10060; Recusado pelo CREA</span>
+                            {% else %}
+                            <span class="peca-badge badge-and">&#9998; Em Andamento</span>
+                            {% endif %}
+                        </div>
                     </a>
                     {% else %}
                     <div style="padding: 16px 18px; text-align: center;">
@@ -339,7 +385,7 @@
                 <!-- SEÇÃO 2: RELATOS DE VISITA TÉCNICA -->
                 <div class="doc-secao">
                     <div class="doc-secao-titulo">
-                        <span>2. Diário e Relatórios de Visita Técnica</span>
+                        <span>2. Diário e Relatórios de Visita Técnica (Engenheiro ⟷ Proprietário)</span>
                         <span style="font-size:10px; font-weight:600; color:#5A7594;">{{ relatos|length }} REGISTRO(S)</span>
                     </div>
                     {% if not recibo %}
@@ -349,26 +395,35 @@
                     {% endif %}
 
                     {% for r in relatos %}
-                    <a href="{% url 'detalhe_relato' r.pk %}" class="peca-doc">
-                        <div class="peca-info">
+                    <div class="peca-doc">
+                        <a href="{% url 'detalhe_relato' r.pk %}" class="peca-info" style="text-decoration:none; color:inherit;">
                             <div class="peca-icone {% if r.status == 'concluido' %}concluido{% elif r.status == 'pronto_assinar' %}pronto{% else %}andamento{% endif %}">
                                 {% if r.status == 'concluido' %}✓{% elif r.status == 'pronto_assinar' %}✎{% else %}⋯{% endif %}
                             </div>
                             <div>
-                                <div class="peca-nome">Relato de Visita — {{ r.data|date:"d/m/Y" }}</div>
+                                <div class="peca-nome">Relato de Visita Técnica — {{ r.data|date:"d/m/Y" }}</div>
                                 <div class="peca-detalhe">
                                     Posição da Obra: <strong>{{ r.get_posicao_obra_display }}</strong>
                                     {% if r.fotos.exists %}
-                                        • 📷 {{ r.fotos.count }} foto{{ r.fotos.count|pluralize:"s" }}
+                                        &bull; 📷 {{ r.fotos.count }} foto{{ r.fotos.count|pluralize:"s" }}
                                     {% endif %}
-                                    • Condição: {{ r.tempo }}
+                                    &bull; Condição: {{ r.tempo }}
                                 </div>
                             </div>
+                        </a>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            {% if r.status == 'concluido' %}
+                            <span class="peca-badge badge-conc">&#9989; Assinado pelo Proprietário</span>
+                            {% else %}
+                            <a href="{% url 'enviar_whatsapp_assinatura' caderneta.pk 'relato' r.pk %}" target="_blank" class="btn-whatsapp" title="Enviar link para assinatura digital do proprietário">
+                                📱 Enviar WhatsApp
+                            </a>
+                            <span class="peca-badge {% if r.status == 'pronto_assinar' %}badge-pron{% else %}badge-and{% endif %}">
+                                {{ r.get_status_display }}
+                            </span>
+                            {% endif %}
                         </div>
-                        <span class="peca-badge {% if r.status == 'concluido' %}badge-conc{% elif r.status == 'pronto_assinar' %}badge-pron{% else %}badge-and{% endif %}">
-                            {{ r.get_status_display }}
-                        </span>
-                    </a>
+                    </div>
                     {% empty %}
                     <div class="doc-vazio">Nenhum relato de visita técnica cadastrado nesta obra.</div>
                     {% endfor %}
@@ -389,7 +444,7 @@
                 <!-- SEÇÃO 3: TERMO DE CONCLUSÃO -->
                 <div class="doc-secao">
                     <div class="doc-secao-titulo">
-                        <span>3. Termo de Conclusão da Obra</span>
+                        <span>3. Termo de Conclusão da Obra (Engenheiro ⟷ Proprietário)</span>
                         {% if termo %}
                         <a href="{% url 'detalhe_termo' termo.pk %}" style="color:var(--azul); font-size:11px; text-decoration:none; font-weight:700;">
                             Abrir Documento →
@@ -403,8 +458,8 @@
                     {% endif %}
 
                     {% if termo %}
-                    <a href="{% url 'detalhe_termo' termo.pk %}" class="peca-doc">
-                        <div class="peca-info">
+                    <div class="peca-doc">
+                        <a href="{% url 'detalhe_termo' termo.pk %}" class="peca-info" style="text-decoration:none; color:inherit;">
                             <div class="peca-icone {% if termo.status == 'concluido' %}concluido{% elif termo.status == 'pronto_assinar' %}pronto{% else %}andamento{% endif %}">
                                 {% if termo.status == 'concluido' %}✓{% elif termo.status == 'pronto_assinar' %}✎{% else %}⋯{% endif %}
                             </div>
@@ -412,11 +467,20 @@
                                 <div class="peca-nome">Termo de Conclusão dos Serviços Técnicos</div>
                                 <div class="peca-detalhe">Lavrado em {{ termo.criado_em|date:"d/m/Y" }}</div>
                             </div>
+                        </a>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            {% if termo.status == 'concluido' %}
+                            <span class="peca-badge badge-conc">&#9989; Assinado pelo Proprietário</span>
+                            {% else %}
+                            <a href="{% url 'enviar_whatsapp_assinatura' caderneta.pk 'termo' termo.pk %}" target="_blank" class="btn-whatsapp" title="Enviar link para assinatura digital do proprietário">
+                                📱 Enviar WhatsApp
+                            </a>
+                            <span class="peca-badge {% if termo.status == 'pronto_assinar' %}badge-pron{% else %}badge-and{% endif %}">
+                                {{ termo.get_status_display }}
+                            </span>
+                            {% endif %}
                         </div>
-                        <span class="peca-badge {% if termo.status == 'concluido' %}badge-conc{% elif termo.status == 'pronto_assinar' %}badge-pron{% else %}badge-and{% endif %}">
-                            {{ termo.get_status_display }}
-                        </span>
-                    </a>
+                    </div>
                     {% else %}
                     <div style="padding: 16px 18px; text-align: center;">
                         <p class="doc-vazio" style="margin: 0 0 10px;">O termo de conclusão ainda não foi lavrado.</p>
@@ -437,11 +501,42 @@
 
             <!-- Rodapé Técnico -->
             <div class="doc-rodape">
-                <span>CONECTOBRA • Sistema de Gestão e Documentação de Obras</span>
-                <span>Documento gerado eletronicamente</span>
+                <span>CONECTOBRA &bull; Sistema de Gestão e Documentação de Obras</span>
+                <span>Documento gerado eletronicamente com Fé Pública</span>
             </div>
 
         </div>
     </div>
 </div>
+
+<!-- MODAL POP-UP DE ALERTA DE RECUSA (VISÍVEL AO ENGENHEIRO QUANDO ACESSA A OBRA) -->
+{% if alerta_recusa %}
+<div class="modal-overlay aberto" id="modalAlertaRecusa">
+    <div class="modal-box" style="max-width: 580px; border-top: 5px solid #C62828;">
+        <div class="modal-header">
+            <div>
+                <h2 style="color: #C62828;">&#9888;&#65039; Homologação Devolvida pelo CREA</h2>
+                <p>O Gestor do CREA analisou o Recibo desta obra e apontou correções necessárias.</p>
+            </div>
+        </div>
+        <div class="modal-body" style="padding-top:16px;">
+            <div style="background:#FFEBEE; border:1px solid #FFCDD2; border-radius:6px; padding:16px; margin-bottom:16px;">
+                <label style="display:block; font-size:11px; font-weight:800; color:#B71C1C; text-transform:uppercase; margin-bottom:6px;">Motivo da Recusa / Parecer do Gestor:</label>
+                <div style="font-size:14px; color:#2C3E50; line-height:1.5; font-weight:500;">
+                    "{{ recibo.motivo_recusa }}"
+                </div>
+            </div>
+            <p style="font-size:13px; color:#555; line-height:1.4;">
+                Ao clicar no botão abaixo, o Recibo será destravado para edição para que você ajuste os dados e solicite novamente a assinatura e homologação institucional.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <a href="{% url 'dispensar_recusa_recibo' recibo.pk %}" class="btn-emitir btn-emitir-primario" style="background:#C62828; padding:10px 24px; font-size:13px;">
+                &#10003; Entendido, Desbloquear Recibo para Correção
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

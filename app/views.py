@@ -1,6 +1,10 @@
 import secrets
 import string
 import json
+import hashlib
+import uuid
+import re
+from urllib.parse import quote
 from datetime import datetime
 
 from django.contrib import messages
@@ -8,10 +12,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
-from django.http import HttpRequest, HttpResponseForbidden
+from django.http import HttpRequest, HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.utils import timezone
+from django.urls import reverse
 
 from app.forms import (
     SolicitacaoCadastroForm, BootstrapAuthenticationForm,
@@ -19,7 +25,8 @@ from app.forms import (
 )
 from app.models import (
     PerfilUsuario, SolicitacaoCadastro, Caderneta,
-    Recibo, Relato, FotoRelato, Termo, Proprietario
+    Recibo, Relato, FotoRelato, Termo, Proprietario,
+    AssinaturaDocumento
 )
 
 
@@ -113,6 +120,65 @@ def _enviar_email_negacao(solicitacao):
         print(f'[CREA] Erro ao enviar e-mail para {solicitacao.email}: {e}')
 
 
+def _get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '127.0.0.1')
+
+
+def _enviar_email_recibo_homologado(recibo):
+    assunto = f'CREA Adamantina - Recibo Homologado: Obra {recibo.caderneta.apelido}'
+    corpo = (
+        f'Ola, {recibo.usuario.first_name}!\n\n'
+        f'Informamos que o Recibo de Responsabilidade Tecnica da obra "{recibo.caderneta.apelido}" '
+        f'foi HOMOLOGADO E ASSINADO DIGITALMENTE pelo Gestor do CREA Adamantina.\n\n'
+        f'Dados da Obra:\n'
+        f'  Obra: {recibo.caderneta.apelido}\n'
+        f'  Contratante: {recibo.proprietario.nome}\n'
+        f'  Data de Homologacao: {datetime.now().strftime("%d/%m/%Y %H:%M")}\n\n'
+        f'Acesse o sistema para visualizar o documento oficial homologado:\n'
+        f'  {settings.SITE_URL}/cadernetas/{recibo.caderneta.pk}/\n\n'
+        f'Atenciosamente,\n'
+        f'Equipe CREA Adamantina'
+    )
+    try:
+        send_mail(
+            assunto, corpo,
+            settings.DEFAULT_FROM_EMAIL,
+            [recibo.usuario.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f'[CREA] Erro ao enviar e-mail de homologacao para {recibo.usuario.email}: {e}')
+
+
+def _enviar_email_recibo_recusado(recibo):
+    assunto = f'CREA Adamantina - Pendencia Apontada no Recibo: Obra {recibo.caderneta.apelido}'
+    corpo = (
+        f'Ola, {recibo.usuario.first_name}!\n\n'
+        f'O Recibo de Responsabilidade Tecnica da obra "{recibo.caderneta.apelido}" '
+        f'foi analisado pelo Gestor do CREA e NAO pode ser homologado no momento.\n\n'
+        f'Motivo / Inconsistencia apontada pelo Gestor:\n'
+        f'  "{recibo.motivo_recusa}"\n\n'
+        f'O formulario do Recibo foi liberado para edicao no sistema para que voce faca as correcoes necessarias '
+        f'e solicite novamente a homologacao.\n\n'
+        f'Acesse a obra para corrigir:\n'
+        f'  {settings.SITE_URL}/recibos/{recibo.pk}/\n\n'
+        f'Atenciosamente,\n'
+        f'Equipe CREA Adamantina'
+    )
+    try:
+        send_mail(
+            assunto, corpo,
+            settings.DEFAULT_FROM_EMAIL,
+            [recibo.usuario.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f'[CREA] Erro ao enviar e-mail de recusa para {recibo.usuario.email}: {e}')
+
+
 def home(request):
     assert isinstance(request, HttpRequest)
     return render(request, 'app/index.html', {
@@ -201,8 +267,9 @@ def painel_admin(request):
     # 2. Todos os Usuários do Sistema (com carregamento do Perfil para evitar queries N+1)
     usuarios = User.objects.all().select_related('perfil').order_by('-date_joined')
 
-    # 3. Todas as Obras (Cadernetas) criadas por todos os Engenheiros/Agrônomos
-    obras = Caderneta.objects.all().select_related('usuario', 'recibo__proprietario').order_by('-criado_em')
+    # 3. Obras com solicitação de assinatura (Regra: Gestor só visualiza quando solicitada a assinatura)
+    recibos_pendentes = Recibo.objects.filter(status='aguardando_gestor').select_related('caderneta', 'usuario', 'proprietario').order_by('-atualizado_em')
+    recibos_homologados = Recibo.objects.filter(status='concluido').select_related('caderneta', 'usuario', 'proprietario', 'gestor_signatario').order_by('-assinado_gestor_em')
 
     # 4. Captura o nível do Admin logado com segurança
     nivel = request.user.perfil.nivel
@@ -215,7 +282,8 @@ def painel_admin(request):
         'aprovadas': aprovadas,
         'negadas': negadas,
         'usuarios': usuarios,
-        'obras': obras,
+        'recibos_pendentes': recibos_pendentes,
+        'recibos_homologados': recibos_homologados,
     })
 
 
@@ -355,24 +423,25 @@ def criar_caderneta(request):
 @login_required
 def detalhe_caderneta(request, pk):
     """Exibe os detalhes de uma caderneta específica."""
-    caderneta = get_object_or_404(
-        Caderneta,
-        pk=pk,
-        usuario=request.user
-    )
+    if _is_admin(request.user):
+        caderneta = get_object_or_404(Caderneta, pk=pk)
+    else:
+        caderneta = get_object_or_404(Caderneta, pk=pk, usuario=request.user)
 
     recibo = getattr(caderneta, 'recibo', None)
-
     relatos = []
     termo = None
+    alerta_recusa = False
 
     if recibo:
         relatos = recibo.relatos.all()
-
         try:
             termo = recibo.termo
         except:
             termo = None
+
+        if recibo.status == 'recusado' and not recibo.recusa_visualizada and request.user == caderneta.usuario:
+            alerta_recusa = True
 
     return render(request, 'app/detalhe_caderneta.html', {
         'title': caderneta.apelido,
@@ -381,6 +450,8 @@ def detalhe_caderneta(request, pk):
         'recibo': recibo,
         'relatos': relatos,
         'termo': termo,
+        'alerta_recusa': alerta_recusa,
+        'is_gestor': _is_admin(request.user),
     })
 
 
@@ -432,9 +503,21 @@ def criar_recibo(request, pk):
 @login_required
 def detalhe_recibo(request, pk):
     """Exibe e edita os detalhes de um recibo."""
-    recibo = get_object_or_404(Recibo, pk=pk, caderneta__usuario=request.user)
+    if _is_admin(request.user):
+        recibo = get_object_or_404(Recibo, pk=pk)
+    else:
+        recibo = get_object_or_404(Recibo, pk=pk, caderneta__usuario=request.user)
+
+    is_gestor = _is_admin(request.user)
+    is_owner = (recibo.caderneta.usuario == request.user)
+    is_locked = recibo.status in ('aguardando_gestor', 'concluido')
+    alerta_recusa = (recibo.status == 'recusado' and not recibo.recusa_visualizada and is_owner)
 
     if request.method == 'POST':
+        if is_locked and not is_gestor:
+            messages.error(request, 'Este documento está sob análise do CREA ou já foi homologado e não pode ser editado.')
+            return redirect('detalhe_recibo', pk=recibo.pk)
+
         proprietario_form = ProprietarioForm(request.POST, prefix='prop', instance=recibo.proprietario)
         recibo_form = ReciboForm(request.POST, instance=recibo)
 
@@ -442,6 +525,8 @@ def detalhe_recibo(request, pk):
             proprietario_form.save()
             recibo_obj = recibo_form.save(commit=False)
             recibo_obj.status = 'em_andamento'
+            recibo_obj.motivo_recusa = ''
+            recibo_obj.recusa_visualizada = False
             recibo_obj.save()
 
             messages.success(request, 'Recibo atualizado com sucesso! Status resetado para "Em andamento".')
@@ -463,7 +548,11 @@ def detalhe_recibo(request, pk):
         'recibo': recibo,
         'proprietario_form': proprietario_form,
         'recibo_form': recibo_form,
+        'is_gestor': is_gestor,
+        'is_owner': is_owner,
+        'is_locked': is_locked,
     })
+
 
 
 @login_required
@@ -646,3 +735,275 @@ def editar_usuario_admin(request, pk):
 
     messages.success(request, f'Dados de {usuario.first_name} atualizados com sucesso!')
     return redirect('painel_admin')
+
+
+# ─── ASSINATURA E HOMOLOGAÇÃO DO RECIBO (ENGENHEIRO ⟷ GESTOR CREA) ───
+
+@require_POST
+@login_required
+def solicitar_homologacao_recibo(request, pk):
+    """Engenheiro assina digitalmente o recibo e envia para homologação do CREA."""
+    recibo = get_object_or_404(Recibo, pk=pk, caderneta__usuario=request.user)
+
+    if recibo.status not in ('em_andamento', 'recusado'):
+        messages.warning(request, 'O recibo já foi enviado ou homologado.')
+        return redirect('detalhe_recibo', pk=recibo.pk)
+
+    dados_hash = f"{recibo.caderneta.apelido}|{recibo.proprietario.cpf_cnpj}|{recibo.area_total}|{recibo.local_obra}|{recibo.data}|{timezone.now()}"
+    recibo.hash_documento = hashlib.sha256(dados_hash.encode('utf-8')).hexdigest()
+    recibo.assinado_eng_em = timezone.now()
+    recibo.ip_eng = _get_client_ip(request)
+    recibo.status = 'aguardando_gestor'
+    recibo.motivo_recusa = ''
+    recibo.recusa_visualizada = False
+    recibo.save()
+
+    messages.success(request, 'Recibo assinado com sucesso! O documento foi travado e enviado para a fila de homologação do CREA.')
+    return redirect('detalhe_caderneta', pk=recibo.caderneta.pk)
+
+
+@require_POST
+@login_required
+def homologar_recibo_gestor(request, pk):
+    """Gestor do CREA valida sua senha institucional e assina/homologa o recibo."""
+    if not _is_admin(request.user):
+        return HttpResponseForbidden('Acesso negado. Apenas gestores do CREA podem homologar documentos.')
+
+    recibo = get_object_or_404(Recibo, pk=pk)
+
+    if recibo.status != 'aguardando_gestor':
+        messages.warning(request, 'Este recibo não está aguardando homologação.')
+        return redirect('detalhe_recibo', pk=recibo.pk)
+
+    senha = request.POST.get('senha_gestor', '')
+    if not request.user.check_password(senha):
+        messages.error(request, 'Senha institucional incorreta! A homologação não foi realizada.')
+        return redirect('detalhe_recibo', pk=recibo.pk)
+
+    recibo.assinado_gestor_em = timezone.now()
+    recibo.gestor_signatario = request.user
+    recibo.ip_gestor = _get_client_ip(request)
+    recibo.status = 'concluido'
+    recibo.save()
+
+    _enviar_email_recibo_homologado(recibo)
+
+    messages.success(request, f'Recibo da obra "{recibo.caderneta.apelido}" HOMOLOGADO e assinado digitalmente com sucesso!')
+    return redirect('painel_admin')
+
+
+@require_POST
+@login_required
+def recusar_recibo_gestor(request, pk):
+    """Gestor do CREA recusa a homologação e registra a justificativa técnica."""
+    if not _is_admin(request.user):
+        return HttpResponseForbidden('Acesso negado. Apenas gestores do CREA podem avaliar documentos.')
+
+    recibo = get_object_or_404(Recibo, pk=pk)
+
+    if recibo.status != 'aguardando_gestor':
+        messages.warning(request, 'Este recibo não está aguardando homologação.')
+        return redirect('detalhe_recibo', pk=recibo.pk)
+
+    motivo = request.POST.get('motivo_recusa', '').strip()
+    if not motivo:
+        messages.error(request, 'É obrigatório descrever o motivo da inconsistência técnica para recusar o recibo.')
+        return redirect('detalhe_recibo', pk=recibo.pk)
+
+    recibo.motivo_recusa = motivo
+    recibo.recusa_visualizada = False
+    recibo.assinado_eng_em = None  # reseta assinatura do engenheiro para retificação
+    recibo.status = 'recusado'
+    recibo.save()
+
+    _enviar_email_recibo_recusado(recibo)
+
+    messages.warning(request, f'Homologação do Recibo recusada. O engenheiro responsável foi notificado com o motivo apontado.')
+    return redirect('painel_admin')
+
+
+@login_required
+def dispensar_recusa_recibo(request, pk):
+    """Engenheiro confirma ciência da recusa e libera o recibo para edição."""
+    recibo = get_object_or_404(Recibo, pk=pk, caderneta__usuario=request.user)
+    recibo.recusa_visualizada = True
+    recibo.status = 'em_andamento'
+    recibo.save()
+
+    messages.info(request, 'Recibo desbloqueado para edição. Efetue as correções necessárias e solicite nova homologação.')
+    return redirect('detalhe_recibo', pk=recibo.pk)
+
+
+# ─── ASSINATURA ELETRÔNICA DO PROPRIETÁRIO VIA WHATSAPP (RELATOS E TERMO) ───
+
+@login_required
+def enviar_whatsapp_assinatura(request, pk, tipo_doc, doc_id):
+    """Gera o token de assinatura segura e redireciona para o WhatsApp do proprietário."""
+    caderneta = get_object_or_404(Caderneta, pk=pk, usuario=request.user)
+
+    if not hasattr(caderneta, 'recibo') or not caderneta.recibo.proprietario:
+        messages.error(request, 'Caderneta não possui recibo ou proprietário cadastrado.')
+        return redirect('detalhe_caderneta', pk=pk)
+
+    proprietario = caderneta.recibo.proprietario
+    if not proprietario.celular:
+        messages.error(request, 'Cadastre o número de Celular/WhatsApp do proprietário no Recibo antes de enviar.')
+        return redirect('detalhe_recibo', pk=caderneta.recibo.pk)
+
+    if tipo_doc == 'relato':
+        doc = get_object_or_404(Relato, pk=doc_id, recibo__caderneta=caderneta)
+        nome_doc = f"Relato de Visita Técnica ({doc.data.strftime('%d/%m/%Y')})"
+    elif tipo_doc == 'termo':
+        doc = get_object_or_404(Termo, pk=doc_id, recibo__caderneta=caderneta)
+        nome_doc = "Termo de Conclusão da Obra"
+    else:
+        raise Http404('Tipo de documento inválido.')
+
+    # Engenheiro assina primeiro se ainda não assinou
+    if not doc.assinado_eng_em:
+        doc.assinado_eng_em = timezone.now()
+        doc.ip_eng = _get_client_ip(request)
+        doc.status = 'pronto_assinar'
+        doc.save()
+
+    # Cria ou recupera assinatura pendente com token seguro
+    assinatura, created = AssinaturaDocumento.objects.get_or_create(
+        tipo_documento=tipo_doc,
+        documento_id=doc_id,
+        papel_signatario='proprietario',
+        status='pendente',
+        defaults={
+            'nome_signatario': proprietario.nome,
+            'cpf_signatario': proprietario.cpf_cnpj,
+            'canal_envio': f'WhatsApp ({proprietario.celular})',
+            'token': uuid.uuid4().hex,
+            'hash_documento': hashlib.sha256(f"{tipo_doc}|{doc_id}|{proprietario.cpf_cnpj}|{timezone.now()}".encode('utf-8')).hexdigest(),
+        }
+    )
+
+    # Limpa o telefone para wa.me (apenas dígitos)
+    celular_limpo = re.sub(r'\D', '', proprietario.celular)
+    if not celular_limpo.startswith('55'):
+        celular_limpo = '55' + celular_limpo
+
+    link_assinar = request.build_absolute_uri(reverse('assinar_documento_publico', kwargs={'token': assinatura.token}))
+    texto = (
+        f"Olá {proprietario.nome}!\n\n"
+        f"Aqui é o Eng. {request.user.first_name}. O *{nome_doc}* da obra *{caderneta.apelido}* "
+        f"está pronto para sua conferência e assinatura digital com validade jurídica.\n\n"
+        f"Acesse o link seguro para assinar pelo celular:\n"
+        f"{link_assinar}\n\n"
+        f"Sistema ConectObra • CREA Adamantina"
+    )
+
+    return redirect(f"https://wa.me/{celular_limpo}?text={quote(texto)}")
+
+
+def assinar_documento_publico(request, token):
+    """Página pública mobile para o proprietário visualizar e assinar o documento."""
+    assinatura = get_object_or_404(AssinaturaDocumento, token=token)
+
+    documento = None
+    caderneta = None
+    fotos = []
+    servicos = []
+
+    if assinatura.tipo_documento == 'relato':
+        documento = get_object_or_404(Relato, pk=assinatura.documento_id)
+        caderneta = documento.recibo.caderneta
+        fotos = documento.fotos.all()
+        servicos = documento.get_servicos_lista()
+        nome_doc = f"Relato de Visita — {documento.data.strftime('%d/%m/%Y')}"
+    elif assinatura.tipo_documento == 'termo':
+        documento = get_object_or_404(Termo, pk=assinatura.documento_id)
+        caderneta = documento.recibo.caderneta
+        nome_doc = "Termo de Conclusão dos Serviços Técnicos"
+    else:
+        raise Http404('Documento inválido.')
+
+    proprietario = caderneta.recibo.proprietario
+    engenheiro = caderneta.usuario
+
+    return render(request, 'app/assinar_publico.html', {
+        'title': f'Assinatura Digital - {nome_doc}',
+        'year': datetime.now().year,
+        'assinatura': assinatura,
+        'documento': documento,
+        'caderneta': caderneta,
+        'proprietario': proprietario,
+        'engenheiro': engenheiro,
+        'nome_doc': nome_doc,
+        'fotos': fotos,
+        'servicos': servicos,
+    })
+
+
+@require_POST
+def confirmar_assinatura_publico(request, token):
+    """Confirma a assinatura eletrônica do proprietário mediante validação de CPF."""
+    assinatura = get_object_or_404(AssinaturaDocumento, token=token)
+
+    if assinatura.status == 'concluido':
+        messages.info(request, 'Este documento já foi assinado anteriormente.')
+        return redirect('assinar_documento_publico', token=token)
+
+    cpf_digitado = request.POST.get('cpf', '').strip()
+    cpf_digitado_limpo = re.sub(r'\D', '', cpf_digitado)
+    cpf_cadastrado_limpo = re.sub(r'\D', '', assinatura.cpf_signatario)
+
+    if not cpf_digitado_limpo or cpf_digitado_limpo != cpf_cadastrado_limpo:
+        messages.error(request, 'O CPF informado não confere com o titular cadastrado neste documento. Por favor, verifique.')
+        return redirect('assinar_documento_publico', token=token)
+
+    concordo = request.POST.get('concordo')
+    if not concordo:
+        messages.error(request, 'É necessário concordar com os termos da declaração para assinar.')
+        return redirect('assinar_documento_publico', token=token)
+
+    # Grava trilha de auditoria
+    agora = timezone.now()
+    ip = _get_client_ip(request)
+    user_agent = request.META.get('HTTP_USER_AGENT', '')
+
+    assinatura.assinado_em = agora
+    assinatura.ip_origem = ip
+    assinatura.user_agent = user_agent
+    assinatura.termo_aceite = "Declaro que li e concordo com as informações e termos descritos neste documento técnico para todos os fins de direito."
+    assinatura.status = 'concluido'
+    assinatura.save()
+
+    # Atualiza documento subjacente
+    if assinatura.tipo_documento == 'relato':
+        relato = get_object_or_404(Relato, pk=assinatura.documento_id)
+        relato.assinado_prop_em = agora
+        relato.ip_prop = ip
+        relato.status = 'concluido'
+        relato.save()
+    elif assinatura.tipo_documento == 'termo':
+        termo = get_object_or_404(Termo, pk=assinatura.documento_id)
+        termo.assinado_prop_em = agora
+        termo.ip_prop = ip
+        termo.status = 'concluido'
+        termo.save()
+
+    messages.success(request, 'Documento assinado digitalmente com sucesso! Sua assinatura foi chancelada e arquivada.')
+    return redirect('assinar_documento_publico', token=token)
+
+
+def validar_documento_publico(request, token):
+    """Página pública de validação de autenticidade (aberta ao escanear o QR Code)."""
+    assinatura = AssinaturaDocumento.objects.filter(token=token).first()
+    recibo = None
+
+    if not assinatura:
+        # Pode ser o hash de um recibo homologado
+        recibo = Recibo.objects.filter(hash_documento=token).first()
+        if not recibo:
+            raise Http404('Documento ou certidão de autenticidade não localizada.')
+
+    return render(request, 'app/validar_publico.html', {
+        'title': 'Certidão de Autenticidade Digital',
+        'year': datetime.now().year,
+        'assinatura': assinatura,
+        'recibo': recibo,
+    })

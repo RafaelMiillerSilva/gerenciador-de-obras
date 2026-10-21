@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} — CREA Adamantina</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --azul-escuro: #0E2238;
+            --azul: #1E3F6A;
+            --verde: #2E7D32;
+            --cinza-bg: #F4F7FB;
+            --borda: #D8E0EA;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--cinza-bg);
+            color: #2C3E50;
+            line-height: 1.6;
+            padding: 30px 16px;
+        }
+
+        .certidao-wrap {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid var(--borda);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        .certidao-header {
+            background: var(--azul-escuro);
+            color: #fff;
+            padding: 32px 30px 24px;
+            text-align: center;
+            border-bottom: 4px solid var(--verde);
+        }
+        .cert-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #8AADD4;
+            text-transform: uppercase;
+        }
+        .cert-titulo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            margin-top: 4px;
+        }
+        .cert-sub {
+            font-size: 13px;
+            color: #B4CCE8;
+            margin-top: 4px;
+        }
+
+        .certidao-body {
+            padding: 32px 36px;
+        }
+
+        /* Banner de Sucesso */
+        .status-sucesso {
+            background: #E8F5E9;
+            border: 1.5px solid #A5D6A7;
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .status-sucesso .icone {
+            font-size: 32px;
+            color: var(--verde);
+        }
+        .status-sucesso .texto h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            color: #1B5E20;
+            font-weight: 700;
+        }
+        .status-sucesso .texto p {
+            font-size: 13px;
+            color: #2E7D32;
+        }
+
+        .secao-titulo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--azul);
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #E0E6F0;
+            padding-bottom: 6px;
+            margin: 20px 0 12px;
+        }
+
+        .tabela-dados {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        .tabela-dados td {
+            padding: 9px 12px;
+            font-size: 13.5px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+        .tabela-dados td.rotulo {
+            width: 35%;
+            font-weight: 700;
+            color: #5A6A7A;
+            background: #FAFBFD;
+        }
+        .tabela-dados td.valor {
+            color: #1A2838;
+            font-weight: 500;
+        }
+
+        .hash-box {
+            font-family: monospace;
+            font-size: 12px;
+            background: #F1F5F9;
+            padding: 10px 14px;
+            border-radius: 6px;
+            word-break: break-all;
+            border: 1px solid #CBD5E1;
+            color: #0F172A;
+            margin-top: 6px;
+        }
+
+        .marco-legal {
+            background: #FAFBFD;
+            border-left: 3px solid var(--azul);
+            padding: 12px 16px;
+            font-size: 12px;
+            color: #556980;
+            line-height: 1.5;
+            margin-top: 24px;
+            border-radius: 2px;
+        }
+
+        .certidao-footer {
+            border-top: 1px solid var(--borda);
+            background: #FAFBFD;
+            padding: 16px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .btn-imprimir {
+            background: var(--azul);
+            color: #fff;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 4px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        @media print {
+            body { background: #fff; padding: 0; }
+            .certidao-wrap { border: none; box-shadow: none; }
+            .btn-imprimir { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="certidao-wrap">
+
+    <header class="certidao-header">
+        <div class="cert-logo">Conselho Regional de Engenharia e Agronomia — CREA Adamantina</div>
+        <div class="cert-titulo">Certidão de Autenticidade e Fé Pública</div>
+        <div class="cert-sub">Sistema ConectObra &bull; Validação de Assinatura e Integridade Documental</div>
+    </header>
+
+    <div class="certidao-body">
+
+        <div class="status-sucesso">
+            <div class="icone">&#9989;</div>
+            <div class="texto">
+                <h3>Documento Oficial Autêntico e Registrado</h3>
+                <p>A assinatura eletrônica deste documento foi verificada com sucesso em nossos servidores.</p>
+            </div>
+        </div>
+
+        {% if recibo %}
+        <!-- DETALHES DE RECIBO HOMOLOGADO -->
+        <h4 class="secao-titulo">Informações do Recibo de Responsabilidade Técnica</h4>
+        <table class="tabela-dados">
+            <tr>
+                <td class="rotulo">Obra / Caderneta</td>
+                <td class="valor"><strong>{{ recibo.caderneta.apelido }}</strong></td>
+            </tr>
+            <tr>
+                <td class="rotulo">Local da Obra</td>
+                <td class="valor">{{ recibo.local_obra }}</td>
+            </tr>
+            <tr>
+                <td class="rotulo">Proprietário / Contratante</td>
+                <td class="valor">{{ recibo.proprietario.nome }} (CPF/CNPJ: {{ recibo.proprietario.cpf_cnpj }})</td>
+            </tr>
+            <tr>
+                <td class="rotulo">Responsável Técnico (RT)</td>
+                <td class="valor">{{ recibo.usuario.first_name }} {{ recibo.usuario.last_name|default:recibo.usuario.username }} &bull; CREA: {{ recibo.usuario.perfil.numero_crea|default:"Não informado" }}</td>
+            </tr>
+            <tr>
+                <td class="rotulo">Data da Assinatura do RT</td>
+                <td class="valor">{{ recibo.assinado_eng_em|date:"d/m/Y H:i:s"|default:"Registrada" }} (IP: {{ recibo.ip_eng|default:"Auditado" }})</td>
+            </tr>
+            <tr>
+                <td class="rotulo">Homologador do CREA</td>
+                <td class="valor">
+                    {% if recibo.gestor_signatario %}
+                    {{ recibo.gestor_signatario.first_name }} {{ recibo.gestor_signatario.last_name|default:recibo.gestor_signatario.username }} (CREA: {{ recibo.gestor_signatario.perfil.numero_crea|default:"Gestor Regional" }})
+                    {% else %}
+                    Gestão Regional CREA Adamantina
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td class="rotulo">Data da Homologação</td>
+                <td class="valor">{{ recibo.assinado_gestor_em|date:"d/m/Y H:i:s"|default:"Registrada" }} (IP: {{ recibo.ip_gestor|default:"Auditado" }})</td>
+            </tr>
+        </table>
+
+        <h4 class="secao-titulo">Hash Criptográfico de Integridade (SHA-256)</h4>
+        <div class="hash-box">{{ recibo.hash_documento }}</div>
+
+        {% elif assinatura %}
+        <!-- DETALHES DE RELATO OU TERMO ASSINADO -->
+        <h4 class="secao-titulo">Informações do Documento e da Assinatura</h4>
+        <table class="tabela-dados">
+            <tr>
+                <td class="rotulo">Tipo de Documento</td>
+                <td class="valor">
+                    {% if assinatura.tipo_documento == 'relato' %}
+                    Relato de Visita Técnica
+                    {% elif assinatura.tipo_documento == 'termo' %}
+                    Termo de Conclusão dos Serviços Técnicos
+                    {% else %}
+                    {{ assinatura.tipo_documento|upper }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td class="rotulo">Signatário Titular</td>
+                <td class="valor"><strong>{{ assinatura.nome_signatario }}</strong></td>
+            </tr>
+            <tr>
+                <td class="rotulo">CPF do Signatário</td>
+                <td class="valor">{{ assinatura.cpf_signatario }}</td>
+            </tr>
+            <tr>
+                <td class="rotulo">Canal de Validação</td>
+                <td class="valor">{{ assinatura.canal_envio|default:"WhatsApp Seguro" }}</td>
+            </tr>
+            <tr>
+                <td class="rotulo">Data e Hora da Assinatura</td>
+                <td class="valor">{{ assinatura.assinado_em|date:"d/m/Y H:i:s" }} (UTC-3)</td>
+            </tr>
+            <tr>
+                <td class="rotulo">Endereço IP de Origem</td>
+                <td class="valor">{{ assinatura.ip_origem|default:"Auditado" }}</td>
+            </tr>
+            <tr>
+                <td class="rotulo">Navegador / Dispositivo</td>
+                <td class="valor" style="font-size:11.5px; color:#666;">{{ assinatura.user_agent|slice:":80" }}...</td>
+            </tr>
+        </table>
+
+        <h4 class="secao-titulo">Hash Criptográfico de Integridade (SHA-256)</h4>
+        <div class="hash-box">{{ assinatura.hash_documento }}</div>
+        {% endif %}
+
+        <div class="marco-legal">
+            <strong>Fundamentação Legal:</strong> Certidão emitida eletronicamente com base na Lei Federal nº 14.063/2020 e no art. 10, § 2º da Medida Provisória nº 2.200-2/2001, atestando a autenticidade, autoria e integridade das assinaturas digitais nos arquivos oficiais da fiscalização do CREA.
+        </div>
+
+    </div>
+
+    <footer class="certidao-footer">
+        <div style="font-size:11.5px; color:#888;">
+            Emitido em {% now "d/m/Y H:i:s" %} &bull; CREA Adamantina
+        </div>
+        <button type="button" onclick="window.print()" class="btn-imprimir">
+            &#128438;&#65039; Imprimir Certidão
+        </button>
+    </footer>
+
+</div>
+
+</body>
+</html>

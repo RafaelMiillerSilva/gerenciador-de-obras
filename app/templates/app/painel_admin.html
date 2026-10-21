@@ -1,4 +1,4 @@
-﻿{% extends "app/layout.html" %}
+{% extends "app/layout.html" %}
 {% block content %}
 {% load static %}
 <style>
@@ -650,10 +650,11 @@
             </div>
         </a>
         <a class="stat-item" id="macro-btn-obras" onclick="mudarMacro('obras'); return false;" href="#">
-            <div class="stat-bolinha verde_crea">&#127959;&#65039;</div>
+            <div class="stat-bolinha verde-crea">&#128221;</div>
             <div class="stat-texto">
-                <div class="rotulo">Obras</div>
-                <div class="sub-rotulo">Cadernetas Ativas</div>
+                <div class="numero">{{ recibos_pendentes.count }}</div>
+                <div class="rotulo">Homologações CREA</div>
+                <div class="sub-rotulo">{% if recibos_pendentes.count > 0 %}{{ recibos_pendentes.count }} pendente(s){% else %}Em dia{% endif %}</div>
             </div>
         </a>
     </div>
@@ -835,52 +836,134 @@
         <div class="macro-secao" id="secao-obras">
             <div class="busca-container">
                 <span class="busca-icone">&#128269;</span>
-                <input type="text" class="busca-input" id="busca-obras" onkeyup="filtrarTabela('secao-obras', this.value)" placeholder="Buscar por Título, ART, Proprietário ou Engenheiro...">
+                <input type="text" class="busca-input" id="busca-obras" onkeyup="filtrarTabela('secao-obras', this.value)" placeholder="Buscar por Obra, Engenheiro, ART ou Proprietário...">
             </div>
 
-            <div class="tabela-wrap">
-                {% if obras %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Descri&ccedil;&atilde;o / Obra</th>
-                            <th>N&ordm; ART</th>
-                            <th>Propriet&aacute;rio</th>
-                            <th>Respons&aacute;vel T&eacute;cnico</th>
-                            <th>In&iacute;cio</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for o in obras %}
-                        <tr>
-                            <td class="td-nome">
-                                <strong>{{ o.apelido }}</strong>
-                                <span>{{ o.recibo.local_obra|default:"Local não informado" }}</span>
-                            </td>
-                            <td><span class="td-crea">&mdash;</span></td>
+            <div class="abas">
+                <button class="aba-btn ativa" id="tab-recibos-pendentes" onclick="mudarAbaObras('recibos-pendentes')">
+                    &#9203; Aguardando Homologação <span class="aba-count amarelo">{{ recibos_pendentes.count }}</span>
+                </button>
+                <button class="aba-btn" id="tab-recibos-homologados" onclick="mudarAbaObras('recibos-homologados')">
+                    &#9989; Homologadas pelo CREA <span class="aba-count verde">{{ recibos_homologados.count }}</span>
+                </button>
+            </div>
 
-                            <td class="td-data">
-                                {{ o.recibo.proprietario.nome|default:"Sem proprietário" }}
-                            </td>
+            <!-- PAINEL 1: PENDENTES DE HOMOLOGAÇÃO -->
+            <div class="aba-painel-obras ativa" id="painel-recibos-pendentes">
+                <div class="tabela-wrap">
+                    {% if recibos_pendentes %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Obra / Local</th>
+                                <th>Responsável Técnico (RT)</th>
+                                <th>Proprietário</th>
+                                <th>Solicitado em</th>
+                                <th style="text-align: right;">Ações de Homologação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in recibos_pendentes %}
+                            <tr>
+                                <td class="td-nome">
+                                    <strong>{{ r.caderneta.apelido }}</strong>
+                                    <span>{{ r.local_obra|default:"Local não informado" }}</span>
+                                </td>
+                                <td class="td-data">
+                                    <strong style="color: var(--azul-escuro);">{{ r.usuario.first_name }} {{ r.usuario.last_name|default:r.usuario.username }}</strong><br>
+                                    <span class="td-crea">{{ r.usuario.perfil.numero_crea|default:"CREA não informado" }}</span>
+                                </td>
+                                <td class="td-data">
+                                    {{ r.proprietario.nome }}<br>
+                                    <span style="color:#888; font-size:11px;">CPF/CNPJ: {{ r.proprietario.cpf_cnpj }}</span>
+                                </td>
+                                <td class="td-data">
+                                    {{ r.assinado_eng_em|date:"d/m/Y H:i"|default:r.atualizado_em|date:"d/m/Y H:i" }}<br>
+                                    <span style="color:#2E7D32; font-size:11px; font-weight:700;">&#10003; Assinado pelo RT</span>
+                                </td>
+                                <td>
+                                    <div class="acoes" style="justify-content: flex-end;">
+                                        <a href="{% url 'detalhe_recibo' r.pk %}" class="btn-ver" style="text-decoration:none;">&#128065; Revisar Recibo</a>
+                                        <button type="button" class="btn-aprovar" onclick="abrirHomologarRecibo({{ r.pk }}, '{{ r.caderneta.apelido|escapejs }}', '{{ r.usuario.first_name|escapejs }} {{ r.usuario.last_name|escapejs }}')">&#9989; Homologar</button>
+                                        <button type="button" class="btn-negar" onclick="abrirRecusarRecibo({{ r.pk }}, '{{ r.caderneta.apelido|escapejs }}')">&#10060; Recusar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="tabela-vazia">
+                        <div class="icone">&#128077;</div>
+                        Nenhuma obra aguardando homologação no momento.<br>
+                        <span style="font-size:12px; color:#888; margin-top:4px;">As cadernetas em elaboração pelos engenheiros aparecem aqui assim que assinadas e enviadas ao CREA.</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
 
-                            <td class="td-data" style="color: var(--azul-escuro); font-weight: 500;">
-                                {{ o.usuario.first_name }} {{ o.usuario.last_name|default:o.usuario.username }}
-                            </td>
-
-                            <td class="td-data">
-                                {% if o.recibo %}
-                                {{ o.recibo.data|date:"d/m/Y" }}
-                                {% else %}
-                                --
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <div class="tabela-vazia"><div class="icone">&#127959;&#65039;</div>Nenhuma obra registrada no sistema até o momento.</div>
-                {% endif %}
+            <!-- PAINEL 2: HOMOLOGADAS PELO CREA -->
+            <div class="aba-painel-obras" id="painel-recibos-homologados" style="display: none;">
+                <div class="tabela-wrap">
+                    {% if recibos_homologados %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Obra / Local</th>
+                                <th>Responsável Técnico</th>
+                                <th>Homologado em</th>
+                                <th>Gestor Homologador</th>
+                                <th>Autenticidade</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in recibos_homologados %}
+                            <tr>
+                                <td class="td-nome">
+                                    <strong>{{ r.caderneta.apelido }}</strong>
+                                    <span>{{ r.local_obra|default:"Local não informado" }}</span>
+                                </td>
+                                <td class="td-data">
+                                    {{ r.usuario.first_name }} {{ r.usuario.last_name|default:r.usuario.username }}<br>
+                                    <span class="td-crea">{{ r.usuario.perfil.numero_crea|default:"--" }}</span>
+                                </td>
+                                <td class="td-data">
+                                    <strong style="color:#2E7D32;">{{ r.assinado_gestor_em|date:"d/m/Y H:i"|default:"--" }}</strong>
+                                </td>
+                                <td class="td-data">
+                                    {% if r.gestor_signatario %}
+                                    {{ r.gestor_signatario.first_name }} {{ r.gestor_signatario.last_name|default:r.gestor_signatario.username }}<br>
+                                    <span style="font-size:11px; color:#666;">CREA: {{ r.gestor_signatario.perfil.numero_crea|default:"Gestor CREA" }}</span>
+                                    {% else %}
+                                    Equipe CREA
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if r.hash_documento %}
+                                    <a href="{% url 'validar_documento_publico' r.hash_documento %}" target="_blank" style="font-family:monospace; font-size:11px; color:var(--azul); text-decoration:none; background:#EBF3FB; padding:3px 6px; border-radius:3px;" title="{{ r.hash_documento }}">
+                                        &#128274; {{ r.hash_documento|slice:":12" }}...
+                                    </a>
+                                    {% else %}
+                                    <span style="color:#888; font-size:11px;">Chancelado</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="acoes" style="justify-content: flex-end;">
+                                        <a href="{% url 'detalhe_recibo' r.pk %}" class="btn-ver" style="text-decoration:none;">&#128065; Ver Recibo Oficial</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="tabela-vazia">
+                        <div class="icone">&#128220;</div>
+                        Nenhum recibo homologado até o momento.
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
@@ -1029,6 +1112,63 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="modalHomologarRecibo">
+    <div class="modal-box" style="max-width: 520px;">
+        <div class="modal-header">
+            <div>
+                <h2>Homologar Recibo Técnico</h2>
+                <p id="mh-obra">&mdash;</p>
+            </div>
+            <button class="modal-fechar" onclick="fecharModal('modalHomologarRecibo')">&#10005;</button>
+        </div>
+        <form method="post" id="formHomologarRecibo" action="">
+            {% csrf_token %}
+            <div class="modal-body" style="padding-top:16px;">
+                <div style="background: #E8F5E9; border: 1px solid #C8E6C9; border-radius: 6px; padding: 12px 16px; margin-bottom: 18px; font-size: 13px; color: #1B5E20; line-height: 1.5;">
+                    <strong>&#9989; Fé Pública Institucional:</strong> Ao homologar este Recibo de Responsabilidade Técnica, você atesta a regularidade dos dados perante o CREA Adamantina. Uma certidão com Hash SHA-256 será gerada e o engenheiro será notificado imediatamente.
+                </div>
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:700; color:#333; text-transform:uppercase; margin-bottom:6px;">Confirme sua senha de acesso <span style="color:#C62828;">*</span></label>
+                    <input type="password" name="senha_gestor" class="busca-input" placeholder="Digite sua senha de login no CREA..." required style="padding:10px 14px;">
+                    <div style="font-size:11px; color:#888; margin-top:4px;">Segundo fator de autenticação para assinatura digital com validade jurídica.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" onclick="fecharModal('modalHomologarRecibo')">Cancelar</button>
+                <button type="submit" class="btn-aprovar" style="padding: 9px 22px;">&#9989; Assinar e Homologar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalRecusarRecibo">
+    <div class="modal-box" style="max-width: 560px;">
+        <div class="modal-header">
+            <div>
+                <h2>Recusar Homologação</h2>
+                <p id="mr-obra">&mdash;</p>
+            </div>
+            <button class="modal-fechar" onclick="fecharModal('modalRecusarRecibo')">&#10005;</button>
+        </div>
+        <form method="post" id="formRecusarRecibo" action="">
+            {% csrf_token %}
+            <div class="modal-body" style="padding-top:16px;">
+                <div style="background: #FFF3E0; border: 1px solid #FFE0B2; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #E65100; line-height: 1.4;">
+                    <strong>&#9888;&#65039; Devolução ao Responsável Técnico:</strong> O recibo será devolvido ao status de rascunho com o motivo apontado. Ao abrir a obra, o engenheiro receberá um pop-up com as instruções e poderá corrigir os dados.
+                </div>
+                <div class="modal-negar-area">
+                    <label style="display:block; font-size:12px; font-weight:700; color:#333; text-transform:uppercase; margin-bottom:6px;">Motivo da Recusa / Inconsistência Técnica <span style="color:#C62828;">*</span></label>
+                    <textarea name="motivo_recusa" id="mr-motivo" placeholder="Descreva de forma clara o que o engenheiro precisa corrigir (ex: divergência na metragem, endereço incorreto, etc)..." required style="width:100%; min-height:100px; padding:10px; border:1px solid #CCC; border-radius:4px; font-family:var(--fonte-corpo); font-size:13px;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" onclick="fecharModal('modalRecusarRecibo')">Cancelar</button>
+                <button type="submit" class="btn-aprovar" style="background:#C62828; padding: 9px 22px;">&#10060; Confirmar Recusa</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     // --------------------------------------------------------
     // CONTROLE DE SEÇÕES MACRO E SUB-ABAS
@@ -1046,6 +1186,26 @@
         document.querySelectorAll('.aba-btn').forEach(b => b.classList.remove('ativa'));
         document.getElementById('painel-' + nome).classList.add('ativa');
         document.getElementById('tab-' + nome).classList.add('ativa');
+    }
+
+    function mudarAbaObras(nome) {
+        document.querySelectorAll('.aba-painel-obras').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('#secao-obras .aba-btn').forEach(b => b.classList.remove('ativa'));
+        document.getElementById('painel-' + nome).style.display = 'block';
+        document.getElementById('tab-' + nome).classList.add('ativa');
+    }
+
+    function abrirHomologarRecibo(pk, obra, eng) {
+        document.getElementById('mh-obra').textContent = 'Obra: ' + obra + ' | RT: ' + eng;
+        document.getElementById('formHomologarRecibo').action = '/recibos/' + pk + '/homologar/';
+        document.getElementById('modalHomologarRecibo').classList.add('aberto');
+    }
+
+    function abrirRecusarRecibo(pk, obra) {
+        document.getElementById('mr-obra').textContent = 'Obra: ' + obra;
+        document.getElementById('mr-motivo').value = '';
+        document.getElementById('formRecusarRecibo').action = '/recibos/' + pk + '/recusar/';
+        document.getElementById('modalRecusarRecibo').classList.add('aberto');
     }
 
     // --------------------------------------------------------
@@ -1099,6 +1259,8 @@
             fecharModal('modalDetalhes');
             fecharModal('modalNegar');
             fecharModal('modalUsuario');
+            fecharModal('modalHomologarRecibo');
+            fecharModal('modalRecusarRecibo');
         }
     });
 

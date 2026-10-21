@@ -92,7 +92,7 @@ class SolicitacaoCadastroForm(forms.ModelForm):
 class ProprietarioForm(forms.ModelForm):
     class Meta:
         model = Proprietario
-        fields = ['nome', 'cpf_cnpj', 'email']
+        fields = ['nome', 'cpf_cnpj', 'email', 'celular']
         widgets = {
             'nome': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -107,6 +107,11 @@ class ProprietarioForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'email@example.com'
+            }),
+            'celular': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '(XX) XXXXX-XXXX',
+                'maxlength': '20'
             }),
         }
 

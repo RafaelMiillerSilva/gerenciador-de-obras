@@ -20,10 +20,12 @@ STATUS_SOLICITACAO = [
 ]
 
 STATUS_DOCUMENTO = [
-    ('em_andamento',    'Em andamento'),
-    ('pronto_assinar',  'Pronto para assinar'),
-    ('concluido',       'Concluido'),
-    ('cancelado',       'Cancelado'),
+    ('em_andamento',     'Em andamento'),
+    ('aguardando_gestor', 'Aguardando assinatura do CREA'),
+    ('recusado',         'Recusado pelo CREA'),
+    ('pronto_assinar',   'Pronto para assinar'),
+    ('concluido',        'Concluído'),
+    ('cancelado',        'Cancelado'),
 ]
 
 TIPO_EDIFICACAO = [
@@ -50,19 +52,19 @@ CONFORMIDADE_CHOICES = POSICAO_OBRA_CHOICES
 
 TIPO_SIGNATARIO = [
     ('engenheiro',   'Engenheiro'),
-    ('proprietario', 'Proprietario'),
+    ('gestor',       'Gestor do CREA'),
+    ('proprietario', 'Proprietário'),
 ]
 
 TIPO_DOC_ASSINATURA = [
     ('recibo', 'Recibo'),
     ('relato', 'Relato de Visita'),
-    ('termo',  'Termo de Conclusao'),
+    ('termo',  'Termo de Conclusão'),
 ]
 
 STATUS_ASSINATURA = [
     ('pendente',   'Pendente'),
-    ('parcial',    'Parcialmente assinado'),
-    ('concluido',  'Concluido'),
+    ('concluido',  'Concluído'),
     ('rejeitado',  'Rejeitado'),
 ]
 
@@ -189,6 +191,7 @@ class Proprietario(models.Model):
     nome     = models.CharField('Nome',     max_length=150)
     cpf_cnpj = models.CharField('CPF/CNPJ', max_length=18)
     email    = models.EmailField('E-mail')
+    celular  = models.CharField('Celular / WhatsApp', max_length=20, blank=True)
 
     class Meta:
         verbose_name        = 'Proprietario'
@@ -227,6 +230,22 @@ class Recibo(models.Model):
     criado_em        = models.DateTimeField(auto_now_add=True)
     atualizado_em    = models.DateTimeField(auto_now=True)
 
+    # Fluxo Institucional de Homologação CREA
+    motivo_recusa       = models.TextField('Motivo da recusa do gestor', blank=True)
+    recusa_visualizada  = models.BooleanField('Engenheiro visualizou a recusa', default=False)
+
+    # Assinatura do Engenheiro (Responsável Técnico)
+    assinado_eng_em     = models.DateTimeField('Assinado pelo engenheiro em', null=True, blank=True)
+    ip_eng              = models.GenericIPAddressField('IP do engenheiro', null=True, blank=True)
+    hash_documento      = models.CharField('Hash SHA-256', max_length=64, blank=True)
+
+    # Homologação e Assinatura do Gestor do CREA
+    assinado_gestor_em  = models.DateTimeField('Homologado pelo gestor em', null=True, blank=True)
+    gestor_signatario   = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
+                                            related_name='recibos_homologados',
+                                            verbose_name='Gestor homologador')
+    ip_gestor           = models.GenericIPAddressField('IP do gestor', null=True, blank=True)
+
     class Meta:
         verbose_name        = 'Recibo'
         verbose_name_plural = 'Recibos'
@@ -259,6 +278,13 @@ class Relato(models.Model):
     status           = models.CharField('Status', max_length=20, choices=STATUS_DOCUMENTO, default='em_andamento')
     criado_em        = models.DateTimeField(auto_now_add=True)
     atualizado_em    = models.DateTimeField(auto_now=True)
+
+    # Assinaturas
+    assinado_eng_em  = models.DateTimeField('Assinado pelo engenheiro em', null=True, blank=True)
+    ip_eng           = models.GenericIPAddressField('IP do engenheiro', null=True, blank=True)
+    assinado_prop_em = models.DateTimeField('Assinado pelo proprietario em', null=True, blank=True)
+    ip_prop          = models.GenericIPAddressField('IP do proprietario', null=True, blank=True)
+    hash_documento   = models.CharField('Hash SHA-256', max_length=64, blank=True)
 
     class Meta:
         verbose_name        = 'Relato'
@@ -302,9 +328,45 @@ class Termo(models.Model):
     criado_em        = models.DateTimeField(auto_now_add=True)
     atualizado_em    = models.DateTimeField(auto_now=True)
 
+    # Assinaturas
+    assinado_eng_em  = models.DateTimeField('Assinado pelo engenheiro em', null=True, blank=True)
+    ip_eng           = models.GenericIPAddressField('IP do engenheiro', null=True, blank=True)
+    assinado_prop_em = models.DateTimeField('Assinado pelo proprietario em', null=True, blank=True)
+    ip_prop          = models.GenericIPAddressField('IP do proprietario', null=True, blank=True)
+    hash_documento   = models.CharField('Hash SHA-256', max_length=64, blank=True)
+
     class Meta:
         verbose_name        = 'Termo'
         verbose_name_plural = 'Termos'
 
     def __str__(self):
         return f'Termo - {self.recibo.caderneta.apelido}'
+
+
+class AssinaturaDocumento(models.Model):
+    tipo_documento   = models.CharField('Tipo de Documento', max_length=20, choices=TIPO_DOC_ASSINATURA)
+    documento_id     = models.PositiveIntegerField('ID do Documento')
+    papel_signatario = models.CharField('Papel do Signatário', max_length=20, choices=TIPO_SIGNATARIO)
+    nome_signatario  = models.CharField('Nome do Signatário', max_length=150)
+    cpf_signatario   = models.CharField('CPF/CREA', max_length=30)
+    canal_envio      = models.CharField('Canal de Envio', max_length=50, blank=True)
+
+    token            = models.CharField('Token de Assinatura', max_length=64, unique=True, db_index=True)
+    hash_documento   = models.CharField('Hash SHA-256', max_length=64, blank=True)
+    status           = models.CharField('Status', max_length=20, choices=STATUS_ASSINATURA, default='pendente')
+
+    assinado_em      = models.DateTimeField('Assinado em', null=True, blank=True)
+    ip_origem        = models.GenericIPAddressField('Endereço IP', null=True, blank=True)
+    user_agent       = models.TextField('Navegador / Dispositivo', blank=True)
+    termo_aceite     = models.TextField('Termo de Aceite Legal', blank=True)
+
+    criado_em        = models.DateTimeField(auto_now_add=True)
+    atualizado_em    = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name        = 'Assinatura de Documento'
+        verbose_name_plural = 'Assinaturas de Documentos'
+        ordering            = ['-criado_em']
+
+    def __str__(self):
+        return f'{self.get_tipo_documento_display()} #{self.documento_id} - {self.nome_signatario} ({self.get_status_display()})'

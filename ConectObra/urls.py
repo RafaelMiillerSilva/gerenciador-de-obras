@@ -18,6 +18,10 @@ urlpatterns = [
     # Recibos
     path('cadernetas/<int:pk>/recibo/criar/', views.criar_recibo, name='criar_recibo'),
     path('recibos/<int:pk>/', views.detalhe_recibo, name='detalhe_recibo'),
+    path('recibos/<int:pk>/solicitar-homologacao/', views.solicitar_homologacao_recibo, name='solicitar_homologacao_recibo'),
+    path('recibos/<int:pk>/homologar/', views.homologar_recibo_gestor, name='homologar_recibo_gestor'),
+    path('recibos/<int:pk>/recusar/', views.recusar_recibo_gestor, name='recusar_recibo_gestor'),
+    path('recibos/<int:pk>/dispensar-recusa/', views.dispensar_recusa_recibo, name='dispensar_recusa_recibo'),
 
     # Relatos
     path('cadernetas/<int:pk>/relato/criar/', views.criar_relato, name='criar_relato'),
@@ -27,6 +31,12 @@ urlpatterns = [
     # Termos
     path('cadernetas/<int:pk>/termo/criar/', views.criar_termo, name='criar_termo'),
     path('termos/<int:pk>/', views.detalhe_termo, name='detalhe_termo'),
+
+    # Assinatura Eletrônica Externa (WhatsApp & Proprietário)
+    path('cadernetas/<int:pk>/assinar-whatsapp/<str:tipo_doc>/<int:doc_id>/', views.enviar_whatsapp_assinatura, name='enviar_whatsapp_assinatura'),
+    path('assinar/<str:token>/', views.assinar_documento_publico, name='assinar_documento_publico'),
+    path('assinar/<str:token>/confirmar/', views.confirmar_assinatura_publico, name='confirmar_assinatura_publico'),
+    path('validar/<str:token>/', views.validar_documento_publico, name='validar_documento_publico'),
 
     # Solicitacoes de Cadastro
     path('solicitar-cadastro/', views.solicitar_cadastro, name='solicitar_cadastro'),

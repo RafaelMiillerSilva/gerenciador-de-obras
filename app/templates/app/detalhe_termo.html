@@ -177,22 +177,45 @@
             <div class="doc-status-hint">Se editar este formulário, o status será resetado para "Em andamento".</div>
         </div>
 
-        <!-- ASSINATURA PROVISÓRIA -->
+        <!-- ASSINATURAS OFICIAIS -->
         <div class="doc-assinatura">
-            <div class="doc-assinatura-titulo">Campo de Assinatura</div>
+            <div class="doc-assinatura-titulo" style="border-bottom: 2px solid var(--azul); padding-bottom: 6px; margin-bottom: 16px;">
+                Assinaturas das Partes (Responsável Técnico & Proprietário)
+            </div>
             <div class="doc-assinatura-grid">
-                <div class="doc-assinatura-bloco">
-                    <div class="doc-assinatura-linha">Proprietário</div>
-                    <div class="doc-assinatura-check">
-                        <input type="checkbox" id="check_prop" disabled>
-                        <label for="check_prop" style="cursor:default; font-size:11px; color:#999;">Assinatura pendente</label>
+                <div class="doc-assinatura-bloco" style="border: 1px solid #D8E0EA; padding: 16px; border-radius: 4px; background: {% if termo.assinado_eng_em %}#F0FAF2{% else %}#FAFBFD{% endif %}; text-align: left;">
+                    <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #5A6A7A;">Responsável Técnico (RT)</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--azul-escuro); margin-top: 4px;">{{ termo.recibo.usuario.first_name }} {{ termo.recibo.usuario.last_name|default:termo.recibo.usuario.username }}</div>
+                    <div style="font-size: 12px; color: #666;">CREA: {{ termo.recibo.usuario.perfil.numero_crea|default:"Não informado" }}</div>
+                    <div style="margin-top: 10px;">
+                        {% if termo.assinado_eng_em %}
+                        <span style="display:inline-block; font-size:11px; font-weight:700; color:#2E7D32; background:#E8F5E9; padding:3px 8px; border-radius:3px; border:1px solid #C8E6C9;">
+                            &#10003; Assinado Eletronicamente
+                        </span>
+                        <div style="font-size:11px; color:#888; margin-top:4px;">{{ termo.assinado_eng_em|date:"d/m/Y H:i" }} &bull; IP: {{ termo.ip_eng|default:"Auditado" }}</div>
+                        {% else %}
+                        <span style="display:inline-block; font-size:11px; font-weight:600; color:#E65100; background:#FFF3E0; padding:3px 8px; border-radius:3px;">
+                            &#9203; Será assinado ao enviar para o WhatsApp
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
-                <div class="doc-assinatura-bloco">
-                    <div class="doc-assinatura-linha">Responsável Técnico</div>
-                    <div class="doc-assinatura-check">
-                        <input type="checkbox" id="check_eng" disabled>
-                        <label for="check_eng" style="cursor:default; font-size:11px; color:#999;">Assinatura pendente</label>
+
+                <div class="doc-assinatura-bloco" style="border: 1px solid #D8E0EA; padding: 16px; border-radius: 4px; background: {% if termo.assinado_prop_em %}#F0FAF2{% else %}#FAFBFD{% endif %}; text-align: left;">
+                    <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #5A6A7A;">Proprietário / Contratante</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--azul-escuro); margin-top: 4px;">{{ termo.recibo.proprietario.nome }}</div>
+                    <div style="font-size: 12px; color: #666;">CPF: {{ termo.recibo.proprietario.cpf_cnpj }} &bull; Cel: {{ termo.recibo.proprietario.celular|default:"Não informado" }}</div>
+                    <div style="margin-top: 10px;">
+                        {% if termo.assinado_prop_em %}
+                        <span style="display:inline-block; font-size:11px; font-weight:700; color:#2E7D32; background:#E8F5E9; padding:3px 8px; border-radius:3px; border:1px solid #C8E6C9;">
+                            &#9989; Assinado Digitalmente pelo Celular
+                        </span>
+                        <div style="font-size:11px; color:#888; margin-top:4px;">{{ termo.assinado_prop_em|date:"d/m/Y H:i" }} &bull; IP: {{ termo.ip_prop|default:"Auditado" }}</div>
+                        {% else %}
+                        <span style="display:inline-block; font-size:11px; font-weight:600; color:#E65100; background:#FFF3E0; padding:3px 8px; border-radius:3px;">
+                            &#9203; Aguardando Assinatura via WhatsApp
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -201,15 +224,26 @@
     </div>
 
     <div class="doc-rodape">
-        <div class="doc-rodape-info">Documento gerado pelo sistema CREA Adamantina</div>
+        <div class="doc-rodape-info">Documento gerado pelo sistema CREA Adamantina &bull; Certificação Digital Integrada</div>
         <div class="doc-rodape-info">Atualizado em {{ termo.atualizado_em|date:"d/m/Y H:i" }}</div>
     </div>
 
 </div>
 
-<div class="doc-acoes">
-    <a href="{% url 'detalhe_caderneta' termo.recibo.caderneta.pk %}" class="btn-doc-cancelar">Cancelar</a>
-    <button type="submit" class="btn-doc-salvar">Atualizar Termo</button>
+<div class="doc-acoes" style="display:flex; justify-content:space-between; align-items:center;">
+    <a href="{% url 'detalhe_caderneta' termo.recibo.caderneta.pk %}" class="btn-doc-cancelar">← Voltar à Caderneta</a>
+
+    <div style="display:flex; gap:12px; align-items:center;">
+        {% if termo.status != 'concluido' %}
+        <button type="submit" class="btn-doc-salvar" style="background:#1E3F6A;">Salvar Alterações</button>
+        <a href="{% url 'enviar_whatsapp_assinatura' termo.recibo.caderneta.pk 'termo' termo.pk %}" target="_blank" class="btn-doc-salvar" style="background:#25D366; text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+            📱 Enviar para o Proprietário via WhatsApp
+        </a>
+        {% else %}
+        <button type="button" onclick="window.print()" class="btn-doc-salvar" style="background:#2C3E50;">&#128438;&#65039; Imprimir Termo de Conclusão</button>
+        <div style="font-size:12px; color:#2E7D32; font-weight:700;">&#9989; Termo Concluído e Assinado com Validade Jurídica</div>
+        {% endif %}
+    </div>
 </div>
 
 </form>

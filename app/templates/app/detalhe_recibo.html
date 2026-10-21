@@ -8,14 +8,14 @@
     .doc-voltar-bar a:hover { color: #fff; text-decoration: none; }
 
     .doc-page-bg { background: var(--cinza-claro); padding: 0 24px 64px; }
-    .doc-page-wrap { max-width: 820px; margin: 0 auto; }
+    .doc-page-wrap { max-width: 860px; margin: 0 auto; }
 
     /* Folha de papel */
     .documento {
         background: #fff;
         border: 1px solid #C8D0DC;
-        border-radius: 3px;
-        box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.03);
+        border-radius: 4px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         margin-top: -20px;
         position: relative;
         padding: 0;
@@ -25,14 +25,14 @@
     /* Cabeçalho institucional */
     .doc-cabecalho {
         background: var(--azul-escuro);
-        padding: 28px 40px 22px;
+        padding: 30px 40px 24px;
         text-align: center;
         border-bottom: 4px solid var(--verde);
         position: relative;
     }
     .doc-cabecalho-logo {
         font-family: var(--fonte-titulo);
-        font-size: 1.05rem;
+        font-size: 1.1rem;
         font-weight: 800;
         color: #8AADD4;
         letter-spacing: 2px;
@@ -41,25 +41,59 @@
     }
     .doc-cabecalho-titulo {
         font-family: var(--fonte-titulo);
-        font-size: 1.4rem;
+        font-size: 1.45rem;
         font-weight: 800;
         color: #fff;
         letter-spacing: 1.5px;
         text-transform: uppercase;
     }
     .doc-cabecalho-sub {
-        font-size: 12px;
-        color: #6A92BE;
-        margin-top: 4px;
+        font-size: 13px;
+        color: #9EC0E6;
+        margin-top: 6px;
     }
+
+    /* Banner de Bloqueio/Status */
+    .doc-alerta-status {
+        padding: 14px 28px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 13.5px;
+        line-height: 1.4;
+    }
+    .doc-alerta-status.locked {
+        background: #E8F5E9;
+        border-bottom: 1px solid #C8E6C9;
+        color: #1B5E20;
+    }
+    .doc-alerta-status.concluido {
+        background: #E8F8F5;
+        border-bottom: 2px solid #2ECC71;
+        color: #0E6251;
+    }
+    .doc-alerta-status.recusado {
+        background: #FFEBEE;
+        border-bottom: 2px solid #E53935;
+        color: #B71C1C;
+    }
+
+    /* Trava de campos caso bloqueado */
+    {% if is_locked %}
+    .documento input, .documento select, .documento textarea {
+        background: #F4F6F9 !important;
+        pointer-events: none;
+        cursor: not-allowed;
+        color: #333 !important;
+        border-color: #D1D8E0 !important;
+    }
+    {% endif %}
 
     /* Corpo do documento */
-    .doc-corpo { padding: 32px 40px 24px; }
+    .doc-corpo { padding: 36px 44px 28px; }
 
     /* Seção com título sublinhado */
-    .doc-secao {
-        margin-bottom: 28px;
-    }
+    .doc-secao { margin-bottom: 28px; }
     .doc-secao-titulo {
         font-family: var(--fonte-titulo);
         font-size: 13px;
@@ -117,69 +151,90 @@
         border-color: var(--azul);
         background: #F5F8FC;
     }
-    .doc-campo .hint { font-size: 11px; color: #999; margin-top: 3px; }
+    .doc-campo .hint { font-size: 11px; color: #888; margin-top: 3px; }
     .doc-campo .erro { font-size: 11px; color: #C0392B; margin-top: 3px; }
 
-    /* Separador */
-    .doc-hr { border: none; border-top: 1px dashed #D4DAE4; margin: 24px 0; }
+    .doc-hr { border: none; border-top: 1px dashed #D4DAE4; margin: 28px 0; }
 
-    /* Status */
-    .doc-status-row {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 14px 18px;
-        background: #F4F6F9;
-        border: 1px solid var(--borda);
-        border-radius: 4px;
-    }
-    .doc-status-row select { max-width: 260px; }
-    .doc-status-hint { font-size: 11px; color: #999; margin-top: 6px; }
-
-    /* Assinatura provisória */
-    .doc-assinatura {
+    /* Bloco de Assinaturas Oficiais */
+    .doc-assinaturas-box {
         margin-top: 32px;
         padding-top: 24px;
         border-top: 2px solid var(--azul-escuro);
     }
-    .doc-assinatura-titulo {
-        font-family: var(--fonte-titulo);
-        font-size: 13px;
-        font-weight: 800;
-        color: var(--azul-escuro);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 16px;
-    }
-    .doc-assinatura-grid {
+    .doc-assinaturas-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 32px;
+        gap: 24px;
     }
-    .doc-assinatura-bloco {
-        text-align: center;
+    .card-assinatura {
+        border-radius: 6px;
+        padding: 16px 20px;
+        border: 1.5px solid #D8E0EA;
+        background: #FAFBFD;
+        position: relative;
     }
-    .doc-assinatura-linha {
-        border-top: 1px solid #333;
+    .card-assinatura.assinado {
+        background: #F2FAF4;
+        border-color: #A3D9B1;
+    }
+    .card-assinatura.pendente {
+        background: #FFFDF7;
+        border-color: #FFE082;
+    }
+    .card-assinatura.recusado {
+        background: #FFF5F5;
+        border-color: #FFCDD2;
+    }
+    .card-ass-papel {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #5A6A7A;
+        letter-spacing: 0.5px;
         margin-bottom: 6px;
-        padding-top: 8px;
     }
-    .doc-assinatura-label {
+    .card-ass-nome {
+        font-family: var(--fonte-titulo);
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--azul-escuro);
+        margin-bottom: 4px;
+    }
+    .card-ass-registro {
         font-size: 12px;
-        color: #555;
-        font-weight: 600;
+        color: #666;
+        margin-bottom: 12px;
     }
-    .doc-assinatura-check {
-        display: flex;
+    .card-ass-status-badge {
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 8px;
+        gap: 6px;
         font-size: 12px;
-        color: #777;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 4px;
     }
-    .doc-assinatura-check input[type="checkbox"] {
-        width: 16px; height: 16px; cursor: pointer;
+    .card-ass-status-badge.ok {
+        background: #E8F5E9;
+        color: #2E7D32;
+        border: 1px solid #A5D6A7;
+    }
+    .card-ass-status-badge.warn {
+        background: #FFF8E1;
+        color: #F57F17;
+        border: 1px solid #FFE082;
+    }
+    .card-ass-status-badge.err {
+        background: #FFEBEE;
+        color: #C62828;
+        border: 1px solid #EF9A9A;
+    }
+    .card-ass-meta {
+        font-size: 11px;
+        color: #888;
+        margin-top: 8px;
+        line-height: 1.4;
     }
 
     /* Rodapé do documento */
@@ -194,40 +249,63 @@
     }
     .doc-rodape-info { font-size: 11px; color: #888; }
 
-    /* Ações */
-    .doc-acoes {
+    /* Barra de Ações */
+    .doc-acoes-container {
         display: flex;
-        gap: 12px;
-        justify-content: flex-end;
+        justify-content: space-between;
+        align-items: center;
         padding: 24px 0 0;
+        flex-wrap: wrap;
+        gap: 16px;
     }
     .btn-doc-cancelar {
-        background: none; border: 1.5px solid #D0D5DE; color: #777;
+        background: none; border: 1.5px solid #D0D5DE; color: #666;
         padding: 10px 22px; border-radius: 4px;
         font-family: var(--fonte-titulo); font-weight: 700; cursor: pointer;
         text-decoration: none; font-size: 14px;
+        transition: all .2s;
     }
-    .btn-doc-cancelar:hover { border-color: #AAA; color: #555; text-decoration: none; }
+    .btn-doc-cancelar:hover { border-color: #888; color: #333; text-decoration: none; }
     .btn-doc-salvar {
-        background: var(--verde); color: #fff; border: none;
-        padding: 10px 28px; border-radius: 4px;
+        background: #1E3F6A; color: #fff; border: none;
+        padding: 10px 24px; border-radius: 4px;
         font-family: var(--fonte-titulo); font-weight: 700; cursor: pointer; font-size: 14px;
+        transition: background .2s;
     }
-    .btn-doc-salvar:hover { background: var(--verde-claro); }
+    .btn-doc-salvar:hover { background: #152E4E; }
+    .btn-doc-assinar {
+        background: var(--verde); color: #fff; border: none;
+        padding: 11px 28px; border-radius: 4px;
+        font-family: var(--fonte-titulo); font-weight: 700; cursor: pointer; font-size: 14px;
+        display: inline-flex; align-items: center; gap: 8px;
+        transition: background .2s;
+    }
+    .btn-doc-assinar:hover { background: var(--verde-claro); }
+    .btn-doc-recusar {
+        background: #C62828; color: #fff; border: none;
+        padding: 10px 24px; border-radius: 4px;
+        font-family: var(--fonte-titulo); font-weight: 700; cursor: pointer; font-size: 14px;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-doc-recusar:hover { background: #B71C1C; }
 
     @media (max-width: 700px) {
         .doc-corpo { padding: 24px 20px 16px; }
         .doc-cabecalho { padding: 22px 20px 18px; }
         .doc-campos, .doc-campos.tres, .doc-campos.quatro { grid-template-columns: 1fr; }
-        .doc-assinatura-grid { grid-template-columns: 1fr; }
+        .doc-assinaturas-grid { grid-template-columns: 1fr; }
         .doc-rodape { flex-direction: column; text-align: center; }
+        .doc-acoes-container { flex-direction: column; align-items: stretch; }
     }
 </style>
 
 <!-- BARRA VOLTAR -->
 <div class="doc-voltar-bar">
-    <div style="max-width:820px; margin:0 auto;">
-        <a href="{% url 'detalhe_caderneta' recibo.caderneta.pk %}">← Voltar à Caderneta</a>
+    <div style="max-width:860px; margin:0 auto; display:flex; justify-content:space-between; align-items:center;">
+        <a href="{% url 'detalhe_caderneta' recibo.caderneta.pk %}">← Voltar à Caderneta da Obra</a>
+        {% if is_gestor %}
+        <a href="{% url 'painel_admin' %}" style="color:#6EC972; font-weight:700;">Painel do Gestor CREA →</a>
+        {% endif %}
     </div>
 </div>
 
@@ -235,164 +313,404 @@
 <section class="doc-page-bg" style="padding-top:40px;">
 <div class="doc-page-wrap">
 
-<form method="post" novalidate>
-{% csrf_token %}
-
-<div class="documento">
-
-    <!-- CABEÇALHO INSTITUCIONAL -->
-    <div class="doc-cabecalho">
-        <div class="doc-cabecalho-logo">CREA Adamantina</div>
-        <div class="doc-cabecalho-titulo">Recibo de Responsabilidade Técnica</div>
-        <div class="doc-cabecalho-sub">{{ recibo.caderneta.apelido }} — Cadastrado em {{ recibo.criado_em|date:"d/m/Y" }}</div>
+    {% if messages %}
+    <div style="margin-bottom:20px;">
+        {% for msg in messages %}
+        <div class="django-msg {{ msg.tags }}" style="padding:12px 16px; border-radius:4px; font-size:14px; margin-bottom:10px; background:#fff; border-left:4px solid #1E3F6A; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+            {{ msg }}
+        </div>
+        {% endfor %}
     </div>
+    {% endif %}
 
-    <!-- CORPO -->
-    <div class="doc-corpo">
+    <div class="documento">
 
-        <!-- SEÇÃO 1: PROPRIETÁRIO -->
-        <div class="doc-secao">
-            <div class="doc-secao-titulo"><span class="secao-num">1</span> Informações do Proprietário</div>
-            <div class="doc-campos">
-                <div class="doc-campo">
-                    <label>{{ proprietario_form.nome.label }} <span class="obr">*</span></label>
-                    {{ proprietario_form.nome }}
-                    {% if proprietario_form.nome.errors %}<div class="erro">{{ proprietario_form.nome.errors.0 }}</div>{% endif %}
-                </div>
-                <div class="doc-campo">
-                    <label>{{ proprietario_form.cpf_cnpj.label }} <span class="obr">*</span></label>
-                    {{ proprietario_form.cpf_cnpj }}
-                    <div class="hint">CPF: XXX.XXX.XXX-XX ou CNPJ: XX.XXX.XXX/0001-XX</div>
-                    {% if proprietario_form.cpf_cnpj.errors %}<div class="erro">{{ proprietario_form.cpf_cnpj.errors.0 }}</div>{% endif %}
-                </div>
-            </div>
-            <div class="doc-campos full" style="margin-top:16px;">
-                <div class="doc-campo">
-                    <label>{{ proprietario_form.email.label }} <span class="obr">*</span></label>
-                    {{ proprietario_form.email }}
-                    {% if proprietario_form.email.errors %}<div class="erro">{{ proprietario_form.email.errors.0 }}</div>{% endif %}
-                </div>
-            </div>
+        <!-- CABEÇALHO INSTITUCIONAL -->
+        <div class="doc-cabecalho">
+            <div class="doc-cabecalho-logo">Conselho Regional de Engenharia e Agronomia — CREA Adamantina</div>
+            <div class="doc-cabecalho-titulo">Recibo de Responsabilidade Técnica</div>
+            <div class="doc-cabecalho-sub">Obra: <strong>{{ recibo.caderneta.apelido }}</strong> &bull; Cadastrada em {{ recibo.criado_em|date:"d/m/Y" }}</div>
         </div>
 
-        <!-- SEÇÃO 2: DADOS DA OBRA -->
-        <div class="doc-secao">
-            <div class="doc-secao-titulo"><span class="secao-num">2</span> Dados da Obra</div>
-            <div class="doc-campos full">
-                <div class="doc-campo">
-                    <label>{{ recibo_form.empresa.label }} <span class="obr">*</span></label>
-                    {{ recibo_form.empresa }}
-                </div>
-            </div>
-            <div class="doc-campos full" style="margin-top:16px;">
-                <div class="doc-campo">
-                    <label>{{ recibo_form.local_obra.label }} <span class="obr">*</span></label>
-                    {{ recibo_form.local_obra }}
-                </div>
-            </div>
-            <div class="doc-campos" style="margin-top:16px;">
-                <div class="doc-campo">
-                    <label>{{ recibo_form.tipo_edificacao.label }} <span class="obr">*</span></label>
-                    {{ recibo_form.tipo_edificacao }}
-                </div>
-                <div class="doc-campo">
-                    <label>{{ recibo_form.atividade_tecnica.label }} <span class="obr">*</span></label>
-                    {{ recibo_form.atividade_tecnica }}
-                </div>
+        <!-- BANNERS DE STATUS -->
+        {% if recibo.status == 'concluido' %}
+        <div class="doc-alerta-status concluido">
+            <span style="font-size: 24px;">&#9989;</span>
+            <div>
+                <strong>Documento Oficial Homologado com Fé Pública:</strong> Este Recibo foi assinado digitalmente pelo Responsável Técnico e homologado pelo Gestor Institucional do CREA Adamantina em {{ recibo.assinado_gestor_em|date:"d/m/Y H:i" }}. Os dados estão lacrados e arquivados no sistema.
             </div>
         </div>
-
-        <!-- SEÇÃO 3: ÁREAS -->
-        <div class="doc-secao">
-            <div class="doc-secao-titulo"><span class="secao-num">3</span> Áreas (m²)</div>
-            <div class="doc-campos quatro">
-                <div class="doc-campo">
-                    <label>{{ recibo_form.area_construir.label }}</label>
-                    {{ recibo_form.area_construir }}
-                </div>
-                <div class="doc-campo">
-                    <label>{{ recibo_form.area_ampliar.label }}</label>
-                    {{ recibo_form.area_ampliar }}
-                </div>
-                <div class="doc-campo">
-                    <label>{{ recibo_form.area_reformar.label }}</label>
-                    {{ recibo_form.area_reformar }}
-                </div>
-                <div class="doc-campo">
-                    <label>{{ recibo_form.area_regularizar.label }}</label>
-                    {{ recibo_form.area_regularizar }}
-                </div>
+        {% elif recibo.status == 'aguardando_gestor' %}
+        <div class="doc-alerta-status locked">
+            <span style="font-size: 24px;">&#128274;</span>
+            <div>
+                <strong>Documento Assinado e em Análise Institucional:</strong> Assinado pelo RT em {{ recibo.assinado_eng_em|date:"d/m/Y H:i" }}. Encontra-se na fila de homologação do Gestor do CREA. Os dados estão temporariamente travados contra alteração.
             </div>
         </div>
-
-        <!-- SEÇÃO 4: INFORMAÇÕES FINAIS -->
-        <div class="doc-secao">
-            <div class="doc-secao-titulo"><span class="secao-num">4</span> Informações Finais</div>
-            <div class="doc-campos">
-                <div class="doc-campo">
-                    <label>{{ recibo_form.data.label }} <span class="obr">*</span></label>
-                    {{ recibo_form.data }}
-                </div>
-                <div class="doc-campo">
-                    <label>{{ recibo_form.valor_obra.label }} <span class="obr">*</span></label>
-                    {{ recibo_form.valor_obra }}
-                </div>
+        {% elif recibo.status == 'recusado' %}
+        <div class="doc-alerta-status recusado">
+            <span style="font-size: 24px;">&#9888;&#65039;</span>
+            <div>
+                <strong>Homologação Recusada pelo Gestor do CREA:</strong> {{ recibo.motivo_recusa }}<br>
+                <span style="font-size:12px; opacity:0.9;">Edite as informações apontadas abaixo e envie novamente para homologação.</span>
             </div>
         </div>
+        {% endif %}
 
-        <hr class="doc-hr">
+        <!-- FORMULÁRIO PRINCIPAL -->
+        <form method="post" id="formRecibo" novalidate>
+        {% csrf_token %}
 
-        <!-- STATUS -->
-        <div class="doc-secao">
-            <div class="doc-secao-titulo">Status do Documento</div>
-            <div class="doc-status-row">
-                <select name="status" id="id_status" class="form-control">
-                    <option value="em_andamento" {% if recibo_form.status.value == 'em_andamento' %}selected{% endif %}>Em andamento</option>
-                    <option value="pronto_assinar" {% if recibo_form.status.value == 'pronto_assinar' %}selected{% endif %}>Pronto para assinar</option>
-                </select>
-            </div>
-            <div class="doc-status-hint">Se editar este formulário, o status será automaticamente resetado para "Em andamento".</div>
-        </div>
+        <div class="doc-corpo">
 
-        <!-- ASSINATURA PROVISÓRIA -->
-        <div class="doc-assinatura">
-            <div class="doc-assinatura-titulo">Campo de Assinatura</div>
-            <div class="doc-assinatura-grid">
-                <div class="doc-assinatura-bloco">
-                    <div class="doc-assinatura-linha">Proprietário</div>
-                    <div class="doc-assinatura-check">
-                        <input type="checkbox" id="check_prop" disabled>
-                        <label for="check_prop" style="cursor:default; font-size:11px; color:#999;">Assinatura pendente</label>
+            <!-- SEÇÃO 1: PROPRIETÁRIO / CONTRATANTE -->
+            <div class="doc-secao">
+                <div class="doc-secao-titulo"><span class="secao-num">1</span> Informações do Proprietário / Contratante</div>
+                <div class="doc-campos">
+                    <div class="doc-campo">
+                        <label>{{ proprietario_form.nome.label }} <span class="obr">*</span></label>
+                        {{ proprietario_form.nome }}
+                        {% if proprietario_form.nome.errors %}<div class="erro">{{ proprietario_form.nome.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="doc-campo">
+                        <label>{{ proprietario_form.cpf_cnpj.label }} <span class="obr">*</span></label>
+                        {{ proprietario_form.cpf_cnpj }}
+                        <div class="hint">CPF: XXX.XXX.XXX-XX ou CNPJ: XX.XXX.XXX/0001-XX</div>
+                        {% if proprietario_form.cpf_cnpj.errors %}<div class="erro">{{ proprietario_form.cpf_cnpj.errors.0 }}</div>{% endif %}
                     </div>
                 </div>
-                <div class="doc-assinatura-bloco">
-                    <div class="doc-assinatura-linha">Responsável Técnico</div>
-                    <div class="doc-assinatura-check">
-                        <input type="checkbox" id="check_eng" disabled>
-                        <label for="check_eng" style="cursor:default; font-size:11px; color:#999;">Assinatura pendente</label>
+                <div class="doc-campos" style="margin-top:16px;">
+                    <div class="doc-campo">
+                        <label>{{ proprietario_form.email.label }} <span class="obr">*</span></label>
+                        {{ proprietario_form.email }}
+                        {% if proprietario_form.email.errors %}<div class="erro">{{ proprietario_form.email.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="doc-campo">
+                        <label>Celular / WhatsApp <span class="obr">*</span></label>
+                        {{ proprietario_form.celular }}
+                        <div class="hint">Ex: (18) 99999-9999 (Utilizado para envio de links de assinatura do proprietário)</div>
+                        {% if proprietario_form.celular.errors %}<div class="erro">{{ proprietario_form.celular.errors.0 }}</div>{% endif %}
                     </div>
                 </div>
             </div>
+
+            <!-- SEÇÃO 2: DADOS DA OBRA -->
+            <div class="doc-secao">
+                <div class="doc-secao-titulo"><span class="secao-num">2</span> Dados da Obra e Localização</div>
+                <div class="doc-campos full">
+                    <div class="doc-campo">
+                        <label>{{ recibo_form.empresa.label }} <span class="obr">*</span></label>
+                        {{ recibo_form.empresa }}
+                    </div>
+                </div>
+                <div class="doc-campos full" style="margin-top:16px;">
+                    <div class="doc-campo">
+                        <label>{{ recibo_form.local_obra.label }} <span class="obr">*</span></label>
+                        {{ recibo_form.local_obra }}
+                    </div>
+                </div>
+                <div class="doc-campos" style="margin-top:16px;">
+                    <div class="doc-campo">
+                        <label>{{ recibo_form.tipo_edificacao.label }} <span class="obr">*</span></label>
+                        {{ recibo_form.tipo_edificacao }}
+                    </div>
+                    <div class="doc-campo">
+                        <label>{{ recibo_form.atividade_tecnica.label }} <span class="obr">*</span></label>
+                        {{ recibo_form.atividade_tecnica }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO 3: ÁREAS -->
+            <div class="doc-secao">
+                <div class="doc-secao-titulo"><span class="secao-num">3</span> Áreas do Projeto (m²)</div>
+                <div class="doc-campos quatro">
+                    <div class="doc-campo">
+                        <label>{{ recibo_form.area_construir.label }}</label>
+                        {{ recibo_form.area_construir }}
+                    </div>
+                    <div class="doc-campo">
+                        <label>{{ recibo_form.area_ampliar.label }}</label>
+                        {{ recibo_form.area_ampliar }}
+                    </div>
+                    <div class="doc-campo">
+                        <label>{{ recibo_form.area_reformar.label }}</label>
+                        {{ recibo_form.area_reformar }}
+                    </div>
+                    <div class="doc-campo">
+                        <label>{{ recibo_form.area_regularizar.label }}</label>
+                        {{ recibo_form.area_regularizar }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO 4: INFORMAÇÕES FINAIS -->
+            <div class="doc-secao">
+                <div class="doc-secao-titulo"><span class="secao-num">4</span> Informações Finais e Valores</div>
+                <div class="doc-campos">
+                    <div class="doc-campo">
+                        <label>{{ recibo_form.data.label }} <span class="obr">*</span></label>
+                        {{ recibo_form.data }}
+                    </div>
+                    <div class="doc-campo">
+                        <label>{{ recibo_form.valor_obra.label }} <span class="obr">*</span></label>
+                        {{ recibo_form.valor_obra }}
+                    </div>
+                </div>
+            </div>
+
+            <hr class="doc-hr">
+
+            <!-- SEÇÃO DE ASSINATURAS INSTITUCIONAIS -->
+            <div class="doc-assinaturas-box">
+                <div class="doc-secao-titulo" style="border-bottom-color: #2E7D32;">
+                    <span class="secao-num" style="background: #2E7D32;">&#10003;</span> Assinaturas Digitais e Fé Pública
+                </div>
+
+                <div class="doc-assinaturas-grid">
+
+                    <!-- SIGNATÁRIO 1: RESPONSÁVEL TÉCNICO -->
+                    <div class="card-assinatura {% if recibo.assinado_eng_em %}assinado{% else %}pendente{% endif %}">
+                        <div class="card-ass-papel">Responsável Técnico (RT)</div>
+                        <div class="card-ass-nome">{{ recibo.usuario.first_name }} {{ recibo.usuario.last_name|default:recibo.usuario.username }}</div>
+                        <div class="card-ass-registro">CREA: {{ recibo.usuario.perfil.numero_crea|default:"Não informado" }}</div>
+
+                        {% if recibo.assinado_eng_em %}
+                        <div class="card-ass-status-badge ok">&#10003; Assinado Eletronicamente</div>
+                        <div class="card-ass-meta">
+                            Data/Hora: {{ recibo.assinado_eng_em|date:"d/m/Y H:i:s" }}<br>
+                            IP de Origem: {{ recibo.ip_eng|default:"127.0.0.1" }}
+                        </div>
+                        {% else %}
+                        <div class="card-ass-status-badge warn">&#9203; Assinatura Pendente</div>
+                        <div class="card-ass-meta">
+                            O documento será assinado pelo RT ao clicar em "Assinar e Solicitar Homologação".
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- SIGNATÁRIO 2: GESTOR DO CREA -->
+                    <div class="card-assinatura {% if recibo.assinado_gestor_em %}assinado{% elif recibo.status == 'recusado' %}recusado{% else %}pendente{% endif %}">
+                        <div class="card-ass-papel">Gestor Institucional CREA</div>
+                        {% if recibo.gestor_signatario %}
+                        <div class="card-ass-nome">{{ recibo.gestor_signatario.first_name }} {{ recibo.gestor_signatario.last_name|default:recibo.gestor_signatario.username }}</div>
+                        <div class="card-ass-registro">CREA: {{ recibo.gestor_signatario.perfil.numero_crea|default:"Gestor Regional CREA-SP" }}</div>
+                        {% else %}
+                        <div class="card-ass-nome">CREA Adamantina</div>
+                        <div class="card-ass-registro">Supervisão Técnica Regional</div>
+                        {% endif %}
+
+                        {% if recibo.assinado_gestor_em %}
+                        <div class="card-ass-status-badge ok">&#9989; Homologado com Fé Pública</div>
+                        <div class="card-ass-meta">
+                            Data/Hora: {{ recibo.assinado_gestor_em|date:"d/m/Y H:i:s" }}<br>
+                            IP Gestor: {{ recibo.ip_gestor|default:"127.0.0.1" }}<br>
+                            {% if recibo.hash_documento %}
+                            <span style="font-family:monospace; font-size:10px;">Hash: {{ recibo.hash_documento|slice:":16" }}...</span>
+                            {% endif %}
+                        </div>
+                        {% elif recibo.status == 'aguardando_gestor' %}
+                        <div class="card-ass-status-badge warn">&#9203; Aguardando Parecer do Gestor</div>
+                        <div class="card-ass-meta">
+                            O gestor do CREA analisará os dados técnicos antes de chancelar.
+                        </div>
+                        {% elif recibo.status == 'recusado' %}
+                        <div class="card-ass-status-badge err">&#10060; Homologação Recusada</div>
+                        <div class="card-ass-meta">
+                            Motivo: {{ recibo.motivo_recusa }}
+                        </div>
+                        {% else %}
+                        <div class="card-ass-status-badge warn">&#9203; Aguardando Envio do RT</div>
+                        <div class="card-ass-meta">
+                            O gestor terá acesso ao documento oficial após o envio pelo engenheiro.
+                        </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+        </div><!-- /doc-corpo -->
+
+        <!-- RODAPÉ DO PAPEL -->
+        <div class="doc-rodape">
+            <div class="doc-rodape-info">
+                Sistema ConectObra &bull; CREA Adamantina &bull; Certificação Digital Integrada
+            </div>
+            <div class="doc-rodape-info">
+                Última atualização: {{ recibo.atualizado_em|date:"d/m/Y H:i" }}
+            </div>
         </div>
 
-    </div><!-- /doc-corpo -->
+    </div><!-- /documento -->
 
-    <!-- RODAPÉ -->
-    <div class="doc-rodape">
-        <div class="doc-rodape-info">Documento gerado pelo sistema CREA Adamantina</div>
-        <div class="doc-rodape-info">Atualizado em {{ recibo.atualizado_em|date:"d/m/Y H:i" }}</div>
+    <!-- AÇÕES FORA DO PAPEL -->
+    <div class="doc-acoes-container">
+        <div>
+            <a href="{% url 'detalhe_caderneta' recibo.caderneta.pk %}" class="btn-doc-cancelar">← Voltar à Caderneta</a>
+        </div>
+
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+
+            <!-- AÇÕES DO ENGENHEIRO (DONO) -->
+            {% if is_owner %}
+                {% if recibo.status == 'em_andamento' or recibo.status == 'recusado' %}
+                <button type="submit" class="btn-doc-salvar">Salvar Rascunho</button>
+                </form><!-- fecha formRecibo -->
+
+                <!-- Formulário separado para Assinar e Solicitar Homologação -->
+                <form method="post" action="{% url 'solicitar_homologacao_recibo' recibo.pk %}" style="display:inline;" onsubmit="return confirm('Deseja assinar eletronicamente este Recibo e solicitar a homologação ao CREA Adamantina?\n\nApós o envio, o documento ficará travado para avaliação institucional.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-doc-assinar">&#9989; Assinar e Solicitar Homologação do CREA</button>
+                </form>
+
+                {% elif recibo.status == 'aguardando_gestor' %}
+                </form>
+                <div style="background:#FFF8E1; border:1px solid #FFE082; color:#7B5800; padding:9px 16px; border-radius:4px; font-size:13px; font-weight:600;">
+                    &#9203; Documento assinado por você e em análise pelo Gestor do CREA.
+                </div>
+
+                {% elif recibo.status == 'concluido' %}
+                </form>
+                <button type="button" onclick="window.print()" class="btn-doc-salvar" style="background:#2C3E50;">&#128438;&#65039; Imprimir Recibo Oficial</button>
+                {% if recibo.hash_documento %}
+                <a href="{% url 'validar_documento_publico' recibo.hash_documento %}" target="_blank" class="btn-doc-assinar" style="background:#27AE60; text-decoration:none;">&#128274; Ver Certidão de Autenticidade</a>
+                {% endif %}
+                {% endif %}
+
+            <!-- AÇÕES DO GESTOR DO CREA -->
+            {% elif is_gestor %}
+                </form>
+                {% if recibo.status == 'aguardando_gestor' %}
+                <button type="button" class="btn-doc-recusar" onclick="abrirModalRecusa()">&#10060; Recusar Homologação</button>
+                <button type="button" class="btn-doc-assinar" onclick="abrirModalHomologacao()">&#9989; Homologar e Assinar (CREA)</button>
+                {% elif recibo.status == 'concluido' %}
+                <button type="button" onclick="window.print()" class="btn-doc-salvar" style="background:#2C3E50;">&#128438;&#65039; Imprimir Recibo Oficial</button>
+                {% if recibo.hash_documento %}
+                <a href="{% url 'validar_documento_publico' recibo.hash_documento %}" target="_blank" class="btn-doc-assinar" style="background:#27AE60; text-decoration:none;">&#128274; Ver Certidão de Autenticidade</a>
+                {% endif %}
+                {% endif %}
+            {% else %}
+                </form>
+            {% endif %}
+
+        </div>
     </div>
-
-</div><!-- /documento -->
-
-<!-- AÇÕES FORA DO PAPEL -->
-<div class="doc-acoes">
-    <a href="{% url 'detalhe_caderneta' recibo.caderneta.pk %}" class="btn-doc-cancelar">Cancelar</a>
-    <button type="submit" class="btn-doc-salvar">Atualizar Recibo</button>
-</div>
-
-</form>
 
 </div>
 </section>
+
+<!-- MODAL POP-UP DE ALERTA DE RECUSA (VISÍVEL AO ENGENHEIRO QUANDO O GESTOR RECUSA) -->
+{% if alerta_recusa %}
+<div class="modal-overlay aberto" id="modalAlertaRecusa">
+    <div class="modal-box" style="max-width: 580px; border-top: 5px solid #C62828;">
+        <div class="modal-header">
+            <div>
+                <h2 style="color: #C62828;">&#9888;&#65039; Homologação Devolvida pelo CREA</h2>
+                <p>O Gestor do CREA analisou este documento e apontou inconsistências que precisam ser corrigidas.</p>
+            </div>
+        </div>
+        <div class="modal-body" style="padding-top:16px;">
+            <div style="background:#FFEBEE; border:1px solid #FFCDD2; border-radius:6px; padding:16px; margin-bottom:16px;">
+                <label style="display:block; font-size:11px; font-weight:800; color:#B71C1C; text-transform:uppercase; margin-bottom:6px;">Motivo da Recusa / Parecer do Gestor:</label>
+                <div style="font-size:14px; color:#2C3E50; line-height:1.5; font-weight:500;">
+                    "{{ recibo.motivo_recusa }}"
+                </div>
+            </div>
+            <p style="font-size:13px; color:#555; line-height:1.4;">
+                Ao confirmar abaixo, o formulário será desbloqueado para que você realize as correções necessárias e solicite nova homologação institucional.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <a href="{% url 'dispensar_recusa_recibo' recibo.pk %}" class="btn-doc-assinar" style="background:#C62828; text-decoration:none;">
+                &#10003; Entendido, Desbloquear para Correção
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- MODAL DE HOMOLOGAÇÃO DO GESTOR -->
+{% if is_gestor and recibo.status == 'aguardando_gestor' %}
+<div class="modal-overlay" id="modalHomologarRecibo">
+    <div class="modal-box" style="max-width: 500px;">
+        <div class="modal-header">
+            <div>
+                <h2>Homologar Recibo Técnico</h2>
+                <p>Obra: {{ recibo.caderneta.apelido }} &bull; RT: {{ recibo.usuario.first_name }}</p>
+            </div>
+            <button class="modal-fechar" onclick="fecharModal('modalHomologarRecibo')">&#10005;</button>
+        </div>
+        <form method="post" action="{% url 'homologar_recibo_gestor' recibo.pk %}">
+            {% csrf_token %}
+            <div class="modal-body" style="padding-top:16px;">
+                <div style="background:#E8F5E9; border:1px solid #C8E6C9; border-radius:6px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:#1B5E20; line-height:1.4;">
+                    <strong>&#9989; Fé Pública do CREA:</strong> Ao homologar, você atesta a conformidade das informações técnicas prestadas pelo engenheiro. Uma certidão com Hash SHA-256 será lavrada.
+                </div>
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:700; color:#333; text-transform:uppercase; margin-bottom:6px;">Confirme sua senha de acesso ao CREA <span style="color:#C62828;">*</span></label>
+                    <input type="password" name="senha_gestor" class="busca-input" placeholder="Digite sua senha de login..." required style="width:100%; padding:10px 14px; border:1px solid #CCC; border-radius:4px;">
+                    <div style="font-size:11px; color:#888; margin-top:4px;">Segundo fator de autenticação para assinatura com validade jurídica.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" onclick="fecharModal('modalHomologarRecibo')">Cancelar</button>
+                <button type="submit" class="btn-aprovar" style="padding:9px 22px;">&#9989; Confirmar e Homologar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalRecusarRecibo">
+    <div class="modal-box" style="max-width: 540px;">
+        <div class="modal-header">
+            <div>
+                <h2>Recusar e Devolver ao Engenheiro</h2>
+                <p>Obra: {{ recibo.caderneta.apelido }}</p>
+            </div>
+            <button class="modal-fechar" onclick="fecharModal('modalRecusarRecibo')">&#10005;</button>
+        </div>
+        <form method="post" action="{% url 'recusar_recibo_gestor' recibo.pk %}">
+            {% csrf_token %}
+            <div class="modal-body" style="padding-top:16px;">
+                <div style="background:#FFF3E0; border:1px solid #FFE0B2; border-radius:6px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:#E65100; line-height:1.4;">
+                    <strong>&#9888;&#65039; Devolução Técnica:</strong> O engenheiro receberá um pop-up de alerta com o motivo preenchido abaixo para que corrija as informações da obra.
+                </div>
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:700; color:#333; text-transform:uppercase; margin-bottom:6px;">Motivo da Inconsistência / Ajustes Solicitados <span style="color:#C62828;">*</span></label>
+                    <textarea name="motivo_recusa" placeholder="Descreva detalhadamente o motivo para orientação do engenheiro..." required style="width:100%; min-height:100px; padding:10px; border:1px solid #CCC; border-radius:4px; font-family:var(--fonte-corpo); font-size:13px;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" onclick="fecharModal('modalRecusarRecibo')">Cancelar</button>
+                <button type="submit" class="btn-aprovar" style="background:#C62828; padding:9px 22px;">&#10060; Confirmar Recusa</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    function fecharModal(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.remove('aberto');
+    }
+
+    function abrirModalHomologacao() {
+        var el = document.getElementById('modalHomologarRecibo');
+        if (el) el.classList.add('aberto');
+    }
+
+    function abrirModalRecusa() {
+        var el = document.getElementById('modalRecusarRecibo');
+        if (el) el.classList.add('aberto');
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            fecharModal('modalHomologarRecibo');
+            fecharModal('modalRecusarRecibo');
+        }
+    });
+</script>
 {% endblock %}
